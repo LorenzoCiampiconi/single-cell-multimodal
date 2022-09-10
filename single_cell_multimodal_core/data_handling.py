@@ -6,17 +6,19 @@ import scipy.sparse
 from single_cell_multimodal_core.utils.appdirs import app_static_dir
 
 
-'''
+"""
 this script generates (for each file):
 - One "xxx_values.sparse" file that can be loaded with scipy.sparse.load_npz and contains all the values 
   of the corresponding dataframe (i.e. the result of df.values in a sparse format)
 - One "xxx_idxcol.npz" file that can be loaded with np.load and contains the values of the index and the 
   columns of the corresponding dataframe (i.e the results of df.index and df.columns)
-'''
+"""
+
 
 def convert_to_parquet(filename, out_filename):
     df = pd.read_csv(filename)
     df.to_parquet(out_filename + ".parquet")
+
 
 def convert_h5_to_sparse_csr(filename, out_filename, chunksize=2500):
     start = 0
@@ -26,8 +28,8 @@ def convert_h5_to_sparse_csr(filename, out_filename, chunksize=2500):
     chunks_index_list = []
     columns_name = None
 
-    filename = app_static_dir('DATA') / filename
-    out_filename = app_static_dir('DATA') / out_filename
+    filename = app_static_dir("DATA") / filename
+    out_filename = app_static_dir("DATA") / out_filename
 
     while True:
         df_chunk = pd.read_hdf(filename, start=start, stop=start + chunksize)
@@ -55,8 +57,9 @@ def convert_h5_to_sparse_csr(filename, out_filename, chunksize=2500):
 
     all_indices = np.hstack(chunks_index_list)
 
-    scipy.sparse.save_npz(out_filename.parent / (out_filename.name + '_values.sparse'), all_data_sparse)
-    np.savez(out_filename.parent / (out_filename.name + '_idxcol.npz'), index=all_indices, columns=columns_name)
+    scipy.sparse.save_npz(out_filename.parent / (out_filename.name + "_values.sparse"), all_data_sparse)
+    np.savez(out_filename.parent / (out_filename.name + "_idxcol.npz"), index=all_indices, columns=columns_name)
+
 
 def convert_source_file_to_sparse():
     convert_h5_to_sparse_csr("train_multi_targets.h5", "train_multi_targets")
@@ -66,10 +69,12 @@ def convert_source_file_to_sparse():
     convert_h5_to_sparse_csr("test_multi_inputs.h5", "test_multi_inputs")
     convert_h5_to_sparse_csr("test_cite_inputs.h5", "test_cite_inputs")
 
+
 def convert_source_csv_to_parquet():
     convert_to_parquet("metadata.csv", "metadata")
     convert_to_parquet("evaluation_ids.csv", "evaluation")
     convert_to_parquet("sample_submission.csv", "sample_submission")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     convert_source_file_to_sparse()
