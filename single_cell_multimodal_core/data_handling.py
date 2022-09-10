@@ -47,8 +47,8 @@ def convert_h5_to_sparse_csr(filename, out_filename, chunksize=2500):
 
     all_indices = np.hstack(chunks_index_list)
 
-    scipy.sparse.save_npz(out_filename / "_values.sparse", all_data_sparse)
-    np.savez(out_filename / "_idxcol.npz", index=all_indices, columns=columns_name)
+    scipy.sparse.save_npz(out_filename.parent / (out_filename.name + '_values.sparse'), all_data_sparse)
+    np.savez(out_filename.parent / (out_filename.name + '_idxcol.npz'), index=all_indices, columns=columns_name)
 
 def convert_source_file_to_sparse():
     convert_h5_to_sparse_csr("train_multi_targets.h5", "train_multi_targets")
