@@ -52,7 +52,7 @@ def convert_h5_to_sparse_csr(filename, out_filename, chunksize=2500):
 
 def convert_source_file_to_sparse():
     convert_h5_to_sparse_csr("train_multi_targets.h5", "train_multi_targets")
-    convert_h5_to_sparse_csr(".train_multi_inputs.h5", "train_multi_inputs")
+    convert_h5_to_sparse_csr("train_multi_inputs.h5", "train_multi_inputs")
     convert_h5_to_sparse_csr("train_cite_targets.h5", "train_cite_targets")
     convert_h5_to_sparse_csr("train_cite_inputs.h5", "train_cite_inputs")
     convert_h5_to_sparse_csr("test_multi_inputs.h5", "test_multi_inputs")
