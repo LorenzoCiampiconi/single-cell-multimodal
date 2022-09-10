@@ -6,6 +6,14 @@ import scipy.sparse
 from single_cell_multimodal_core.utils.appdirs import app_static_dir
 
 
+'''
+this script generates (for each file):
+- One "xxx_values.sparse" file that can be loaded with scipy.sparse.load_npz and contains all the values 
+  of the corresponding dataframe (i.e. the result of df.values in a sparse format)
+- One "xxx_idxcol.npz" file that can be loaded with np.load and contains the values of the index and the 
+  columns of the corresponding dataframe (i.e the results of df.index and df.columns)
+'''
+
 def convert_to_parquet(filename, out_filename):
     df = pd.read_csv(filename)
     df.to_parquet(out_filename + ".parquet")
