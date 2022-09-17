@@ -1,6 +1,8 @@
 import abc
 import gc
 import logging
+from typing import Dict, Any
+
 import pandas as pd
 import pathlib
 import pickle as pkl
@@ -16,10 +18,18 @@ from single_cell_multimodal_core.utils.appdirs import app_static_dir
 logger = logging.getLogger(__name__)
 
 class SCMModelABC:
+    def __init__(self, configuration:Dict[str, Dict[str, Any]], label=''):
+        self._configuration = configuration
+        self._model_label = str(self.__class__) + label
+
+    @property
+    def model_label(self):
+        return self._model_label
+
     @property
     @abc.abstractmethod
     def configuration(self):
-        pass
+        return self._configuration
 
     @property
     @abc.abstractmethod
@@ -47,8 +57,8 @@ class SCMModelABC:
 
     @property
     @abc.abstractmethod
-    def params(self):
-        pass
+    def model_params(self):
+        return self.configuration['model_params']
 
     def apply_SVD(self, input, n_components=64):
         svd = TruncatedSVD(n_components=n_components, random_state=1)
@@ -58,8 +68,10 @@ class SCMModelABC:
 
         return output
 
-    def cross_validation(self, X, Y, submit):
-        kf = KFold(n_splits=self.configuration['n_split_for_kfold'], shuffle=True, random_state=1)
+    def cross_validation(self, X, Y, submit=False):
+        logger.info(f'{self.model_label} is performing cross validation')
+
+        kf = KFold(n_splits=self.configuration['cross_validation_params']['n_splits_for_kfold'], shuffle=True, random_state=1)
         score_list = []
         # va_pred = []
         for fold, (idx_tr, idx_va) in enumerate(kf.split(X)):
@@ -68,18 +80,18 @@ class SCMModelABC:
             X_tr = X[idx_tr]
             y_tr = Y[idx_tr]
 
-            model = self.model_wrapper_class(self.model_class(**self.params))
+            model = self.model_wrapper_class(self.model_class(**self.model_params))
             model.fit(X_tr, y_tr)
             del X_tr, y_tr
             gc.collect()
 
             if submit:
-                # model.save(f"/kaggle/temp/model_{fold}")
+                # model_wrapper.save(f"/kaggle/temp/model_{fold}")
                 model_path: pathlib.Path = app_static_dir("SAVED_MODELS") / f"model_{fold}.pkl"
 
                 model_path.write_bytes(pkl.dumps(model))
 
-            # We validate the model
+            # We validate the model_wrapper
             X_va = X[idx_va]
             y_va = Y[idx_va]
 
@@ -95,4 +107,4 @@ class SCMModelABC:
         # Show overall score
         result_df = pd.DataFrame(score_list, columns=['mse', 'corrscore'])
         logger.info(
-            f"{Fore.GREEN}{Style.BRIGHT}Average  mse = {result_df.mse.mean():.5f}; corr = {result_df.corrscore.mean():.3f}{Style.RESET_ALL}")
+            f"Average  mse = {result_df.mse.mean():.5f}; corr = {result_df.corrscore.mean():.3f}")
