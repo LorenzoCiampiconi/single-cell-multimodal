@@ -37,4 +37,4 @@ def negative_correlation_loss(y_true, y_pred):
     r_num = K.sum(tf.multiply(y_true, ym), axis=1)
     r_den = tf.sqrt(K.sum(K.square(ym), axis=1) * float(y_true.shape[-1]))
     r = tf.reduce_mean(r_num / r_den)
-    return - r
+    return -r

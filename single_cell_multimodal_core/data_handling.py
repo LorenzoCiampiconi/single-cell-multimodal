@@ -14,8 +14,10 @@ this script generates (for each file):
   columns of the corresponding dataframe (i.e the results of df.index and df.columns)
 """
 
-def load_sparse(split='train', problem='cite', type='inputs'):
-    return scipy.sparse.load_npz(app_static_dir('DATA') / f'{split}_{problem}_{type}_values.sparse.npz')
+
+def load_sparse(split="train", problem="cite", type="inputs") -> scipy.sparse.csr.csr_matrix:
+    return scipy.sparse.load_npz(app_static_dir("DATA") / f"{split}_{problem}_{type}_values.sparse.npz")
+
 
 def convert_to_parquet(filename, out_filename):
     df = pd.read_csv(filename)
