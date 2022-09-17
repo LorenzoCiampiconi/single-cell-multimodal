@@ -16,8 +16,11 @@ donor, so we expect the final rank to change. More specifically, the task tested
 does not require some time dependent forecasting, while the private does.
 
 
-## Ideas:
+## Ideas and Todos:
 
 - asses distribution of the inputs, with and without zeros
 - consider, by statistical investigation (e.g. Gamma distribution), different objective function
 for LGBM, more generally how the target values do distribute
+- train an encoder-decoder model to embed input feature after more conservative SVD
+    - basic encoder decoder
+    - multi task fashion: encoder decoder + multioutput regressor
