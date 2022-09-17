@@ -6,7 +6,7 @@ from typing import Dict, Any
 
 import numpy as np
 import pandas as pd
-import pathlib
+from pathlib import Path
 import pickle as pkl
 import scipy.sparse
 from sklearn.decomposition import TruncatedSVD
@@ -94,7 +94,7 @@ class SCMModelABC:
 
         kf = KFold(n_splits=self.cross_validation_params["n_splits_for_kfold"], shuffle=True, random_state=1)
         score_list = []
-        # va_pred = []
+
         for fold, (idx_tr, idx_va) in enumerate(kf.split(X)):
             model = None
             gc.collect()
@@ -105,12 +105,6 @@ class SCMModelABC:
             model.fit(X_tr, y_tr)
             del X_tr, y_tr
             gc.collect()
-
-            if save_model:
-                # model_wrapper.save(f"/kaggle/temp/model_{fold}")
-                model_path: pathlib.Path = app_static_dir("SAVED_MODELS") / f"model_{self.model_label}_{fold}.pkl"
-
-                model_path.write_bytes(pkl.dumps(model))
 
             # We validate the model_wrapper
             X_va = X[idx_va]
@@ -125,13 +119,18 @@ class SCMModelABC:
             logger.info(f"{self.model_label} - Fold {fold}: mse = {mse:.5f}, corr =  {corr_score:.3f}")
             score_list.append((mse, corr_score))
 
-        # Show overall score
         result_df = pd.DataFrame(score_list, columns=["mse", "corrscore"])
         logger.info(
             f"{self.model_label} - Average  mse = {result_df.mse.mean():.5f}; corr = {result_df.corrscore.mean():.3f}"
         )
 
         self._trained_model = self.model_wrapper_class(self.model_class(**self.model_params)).fit(X, Y)
+
+        if save_model:
+            model_path: Path = app_static_dir("saved_models") / f"model_{self.model_label}.pkl"
+            model_path.write_bytes(pkl.dumps(self._trained_model))
+
+        return result_df
 
     def full_pipeline(self, save_model=False):
         X, Y = self.train_input, self.train_target
@@ -140,16 +139,19 @@ class SCMModelABC:
         X = self.apply_SVD(X, **self.svd_params)
         logger.debug(f"{self.model_label} - applying SVD - Done")
 
-        self.cross_validation(X, Y, save_model=save_model)
+        cv_results = self.cross_validation(X, Y, save_model=save_model)
 
-        self.generate_public_test_output(self.apply_SVD(self.public_test(), **self.svd_params))
+        Y_test = self.predict_public_test()
 
-    def public_test(self) -> np.array:
-        return self._trained_model.predict(self.test_input)
+        self.generate_public_test_output(Y_test)
+
+    def predict_public_test(self) -> np.array:
+        X_test_reduced = self.apply_SVD(self.test_input, **self.svd_params)
+        return self._trained_model.predict(X_test_reduced)
 
     def generate_public_test_output(self, test_output: np.array):
         test_output[:7476] = 0
-        submission = pd.read_csv(app_static_dir("DATA") / "sample_submission.csv", index_col="row_id", squeeze=True)
+        submission = pd.read_csv(app_static_dir("data") / "sample_submission.csv", index_col="row_id", squeeze=True)
         submission.iloc[: len(test_output.ravel())] = test_output.ravel()
         assert not submission.isna().any()
-        submission.to_csv(app_static_dir('OUT') / f"{self.model_label}_{datetime.now().strftime('%Y%m%d-%H%M')}_submission.csv")
+        submission.to_csv(app_static_dir('out') / f"{self.model_label}_{datetime.now().strftime('%Y%m%d-%H%M')}_submission.csv")

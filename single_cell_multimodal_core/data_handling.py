@@ -16,7 +16,7 @@ this script generates (for each file):
 
 
 def load_sparse(split="train", problem="cite", type="inputs") -> scipy.sparse.csr.csr_matrix:
-    return scipy.sparse.load_npz(app_static_dir("DATA") / f"{split}_{problem}_{type}_values.sparse.npz")
+    return scipy.sparse.load_npz(app_static_dir("data") / f"{split}_{problem}_{type}_values.sparse.npz")
 
 
 def convert_to_parquet(filename, out_filename):
@@ -32,8 +32,8 @@ def convert_h5_to_sparse_csr(filename, out_filename, chunksize=2500):
     chunks_index_list = []
     columns_name = None
 
-    filename = app_static_dir("DATA") / filename
-    out_filename = app_static_dir("DATA") / out_filename
+    filename = app_static_dir("data") / filename
+    out_filename = app_static_dir("data") / out_filename
 
     while True:
         df_chunk = pd.read_hdf(filename, start=start, stop=start + chunksize)
