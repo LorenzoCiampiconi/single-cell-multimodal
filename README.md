@@ -1,6 +1,6 @@
 # Day 1
 17/09/2022
-focus on citeseq, fix of lgbm with sparse data, deeper read of cite seq data docs
+focus on CITEseq, fix of lgbm with sparse data, deeper read of cite seq data docs
 
 ## Understanding
 
@@ -23,4 +23,6 @@ does not require some time dependent forecasting, while the private does.
 for LGBM, more generally how the target values do distribute
 - train an encoder-decoder model to embed input feature after more conservative SVD
     - basic encoder decoder
-    - multi task fashion: encoder decoder + multioutput regressor
+    - multi task fashion: encoder decoder + multi-output regressor
+- verify multi policy to hid cell_type, in case it is hidden only for public test set, we can
+can leverage it in a multitask setting
