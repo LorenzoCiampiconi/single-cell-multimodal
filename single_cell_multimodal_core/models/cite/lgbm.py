@@ -1,6 +1,7 @@
 import lightgbm as lgb
 
 from single_cell_multimodal_core.models.cite.base import CiteModelABC
+from single_cell_multimodal_core.utils.log import setup_logging
 
 
 class LGBMBasedModel(CiteModelABC):
@@ -9,9 +10,10 @@ class LGBMBasedModel(CiteModelABC):
         return lgb.LGBMRegressor
 
 
-if __name__ == '__main__':
-    from single_cell_multimodal_core.models.cite.configurations.lgbm_first_try import params, model_label, cross_validation_params
-    model_wrapper = LGBMBasedModel(configuration={'model_params': params, "cross_validation_params": cross_validation_params}, label=model_label)
+if __name__ == "__main__":
+    from single_cell_multimodal_core.models.cite.configurations.lgbm_first_try import configuration, model_label
 
-    model_wrapper.cross_validation(model_wrapper.train_input, model_wrapper.train_target)
+    setup_logging("DEBUG")
+    model_wrapper = LGBMBasedModel(configuration=configuration, label=model_label)
 
+    model_wrapper.full_pipeline()
