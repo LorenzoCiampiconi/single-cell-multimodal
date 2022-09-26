@@ -19,6 +19,7 @@ does not require some time dependent forecasting, while the private does.
 ## Ideas and Todos:
 
 - asses distribution of the inputs, with and without zeros
+- assess svd singular values behaviour
 - consider, by statistical investigation (e.g. Gamma distribution), different objective function
 for LGBM, more generally how the target values do distribute
 - train an encoder-decoder model to embed input feature after more conservative SVD
