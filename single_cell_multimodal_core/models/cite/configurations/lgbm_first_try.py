@@ -26,5 +26,5 @@ configuration = {
     "cross_validation_params": cross_validation_params,
     "model_params": model_params,
     "svd_params": svd_params,
-     "global_params": global_params
+    "global_params": global_params,
 }

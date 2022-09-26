@@ -75,7 +75,7 @@ class SCMModelABC:
 
     @property
     def seed(self):
-        return self.configuration['global_params']['seed']
+        return self.configuration["global_params"]["seed"]
 
     @property
     def svd_params(self):
@@ -154,4 +154,6 @@ class SCMModelABC:
         submission = pd.read_csv(app_static_dir("data") / "sample_submission.csv", index_col="row_id", squeeze=True)
         submission.iloc[: len(test_output.ravel())] = test_output.ravel()
         assert not submission.isna().any()
-        submission.to_csv(app_static_dir('out') / f"{self.model_label}_{datetime.now().strftime('%Y%m%d-%H%M')}_submission.csv")
+        submission.to_csv(
+            app_static_dir("out") / f"{self.model_label}_{datetime.now().strftime('%Y%m%d-%H%M')}_submission.csv"
+        )

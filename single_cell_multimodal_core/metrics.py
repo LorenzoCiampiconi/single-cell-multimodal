@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+
 def correlation_score(y_true, y_pred):
     """Scores the predictions according to the competition rules.
 

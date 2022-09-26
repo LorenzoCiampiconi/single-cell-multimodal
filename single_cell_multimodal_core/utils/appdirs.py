@@ -20,5 +20,5 @@ def sanitize(fn: Callable[[str], Path]):
 
 
 @sanitize
-def app_static_dir(child:str) -> Path:
+def app_static_dir(child: str) -> Path:
     return Path(__file__).parent.parent.parent.absolute() / child
