@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 import pickle as pkl
-import scipy.sparse
+from scipy import sparse
 from sklearn.decomposition import TruncatedSVD
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import KFold
@@ -43,17 +43,17 @@ class SCMModelABC:
 
     @property
     @abc.abstractmethod
-    def train_input(self) -> scipy.sparse.csr.csr_matrix:
+    def train_input(self) -> sparse.csr_array:
         pass
 
     @property
     @abc.abstractmethod
-    def train_target(self) -> scipy.sparse.csr.csr_matrix:
+    def train_target(self) -> sparse.csr_array:
         pass
 
     @property
     @abc.abstractmethod
-    def test_input(self) -> scipy.sparse.csr.csr_matrix:
+    def test_input(self) -> sparse.csr_array:
         pass
 
     @property

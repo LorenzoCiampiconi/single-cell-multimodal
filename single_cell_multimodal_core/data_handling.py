@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
-import scipy
-import scipy.sparse
+from scipy import sparse
 
 from single_cell_multimodal_core.utils.appdirs import app_static_dir
 
@@ -15,8 +14,8 @@ this script generates (for each file):
 """
 
 
-def load_sparse(split="train", problem="cite", type="inputs") -> scipy.sparse.csr.csr_matrix:
-    return scipy.sparse.load_npz(app_static_dir("data") / f"{split}_{problem}_{type}_values.sparse.npz")
+def load_sparse(split="train", problem="cite", type="inputs") -> sparse.csr_array:
+    return sparse.load_npz(app_static_dir("data") / f"{split}_{problem}_{type}_values.sparse.npz")
 
 
 def convert_to_parquet(filename, out_filename):
@@ -39,7 +38,7 @@ def convert_h5_to_sparse_csr(filename, out_filename, chunksize=2500):
         df_chunk = pd.read_hdf(filename, start=start, stop=start + chunksize)
         if len(df_chunk) == 0:
             break
-        chunk_data_as_sparse = scipy.sparse.csr_matrix(df_chunk.to_numpy())
+        chunk_data_as_sparse = sparse.csr_array(df_chunk.to_numpy())
         sparse_chunks_data_list.append(chunk_data_as_sparse)
         chunks_index_list.append(df_chunk.index.to_numpy())
 
@@ -56,12 +55,12 @@ def convert_h5_to_sparse_csr(filename, out_filename, chunksize=2500):
         del df_chunk
         start += chunksize
 
-    all_data_sparse = scipy.sparse.vstack(sparse_chunks_data_list)
+    all_data_sparse = sparse.vstack(sparse_chunks_data_list)
     del sparse_chunks_data_list
 
     all_indices = np.hstack(chunks_index_list)
 
-    scipy.sparse.save_npz(out_filename.parent / (out_filename.name + "_values.sparse"), all_data_sparse)
+    sparse.save_npz(out_filename.parent / (out_filename.name + "_values.sparse"), all_data_sparse)
     np.savez(out_filename.parent / (out_filename.name + "_idxcol.npz"), index=all_indices, columns=columns_name)
 
 
