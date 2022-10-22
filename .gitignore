@@ -2,6 +2,9 @@
 /data
 /results
 
+# Extra Files
+/extra
+
 # Local settings
 settings.yaml
 
