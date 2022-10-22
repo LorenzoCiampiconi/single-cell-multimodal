@@ -156,9 +156,16 @@ out = trainer.predict(model, test_ds)
 #%% use single layer example (extract embedding)
 
 encoder = model.encoder.eval()
+dslt = DataLoader(
+    test_ds,
+    batch_size=config["batch_size"],
+    shuffle=False,
+    pin_memory=True,
+    num_workers=config["num_workers"],
+)
 
 with torch.no_grad():
-    out = as_numpy(torch.cat([encoder(x) for x in test_ds])).reshape(-1, latent_dim)
+    out = as_numpy(torch.cat([encoder(x) for x in dslt])).reshape(-1, latent_dim)
 
 #%% manual test
 
