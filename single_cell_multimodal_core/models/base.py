@@ -56,13 +56,13 @@ class SCMModelABC:
     def test_input(self) -> sparse.csr_array:
         pass
 
-    @property
-    def model_wrapper_class(self):
-        return MultiOutputRegressor
+    @abc.abstractmethod
+    def instantiate_model(self, **model_instantiation_kwargs):
+        pass
 
     @property
     @abc.abstractmethod
-    def model_class(self):
+    def model_instantiation_kwargs(self):
         pass
 
     @property
@@ -78,16 +78,12 @@ class SCMModelABC:
         return self.configuration["global_params"]["seed"]
 
     @property
-    def svd_params(self):
-        return self.configuration["svd_params"]
+    def dimensionality_reduction_params(self):
+        return self.configuration["dimensionality_reduction_params"]
 
-    def apply_dimensionality_reduction(self, input, n_components=64):
-        svd = TruncatedSVD(n_components=n_components, random_state=self.seed)
-        output = svd.fit_transform(input)
-
-        logger.debug(f"Reduced X shape:  {str(input.shape):14} {input.size*4/1024/1024/1024:2.3f} GByte")
-
-        return output
+    @abc.abstractmethod
+    def apply_dimensionality_reduction(self, input, output_dimensionality=64):
+        ...
 
     def cross_validation(self, X, Y, save_model=False):
         logger.info(f"{self.model_label} - performing cross validation")
@@ -101,7 +97,7 @@ class SCMModelABC:
             X_tr = X[idx_tr]
             y_tr = Y[idx_tr]
 
-            model = self.model_wrapper_class(self.model_class(**self.model_params))
+            model = self.instantiate_model(self.model_instantiation_kwargs)
             model.fit(X_tr, y_tr)
             del X_tr, y_tr
             gc.collect()
@@ -124,7 +120,7 @@ class SCMModelABC:
             f"{self.model_label} - Average  mse = {result_df.mse.mean():.5f}; corr = {result_df.corrscore.mean():.3f}"
         )
 
-        self._trained_model = self.model_wrapper_class(self.model_class(**self.model_params)).fit(X, Y)
+        self._trained_model = self.instantiate_model(self.model_instantiation_kwargs).fit(X, Y)
 
         if save_model:
             model_path: Path = app_static_dir("saved_models") / f"model_{self.model_label}.pkl"
@@ -136,7 +132,7 @@ class SCMModelABC:
         X, Y = self.train_input, self.train_target
 
         logger.debug(f"{self.model_label} - applying SVD")
-        X = self.apply_dimensionality_reduction(X, **self.svd_params)
+        X = self.apply_dimensionality_reduction(X, **self.dimensionality_reduction_params)
         logger.debug(f"{self.model_label} - applying SVD - Done")
 
         cv_results = self.cross_validation(X, Y, save_model=save_model)
@@ -146,7 +142,7 @@ class SCMModelABC:
         self.generate_public_test_output(Y_test)
 
     def predict_public_test(self) -> np.array:
-        X_test_reduced = self.apply_dimensionality_reduction(self.test_input, **self.svd_params)
+        X_test_reduced = self.apply_dimensionality_reduction(self.test_input, **self.dimensionality_reduction_params)
         return self._trained_model.predict(X_test_reduced)
 
     def generate_public_test_output(self, test_output: np.array):
@@ -157,3 +153,27 @@ class SCMModelABC:
         submission.to_csv(
             app_static_dir("out") / f"{self.model_label}_{datetime.now().strftime('%Y%m%d-%H%M')}_submission.csv"
         )
+
+class MultiModelWrapperMixin(metaclass=abc.ABCMeta):
+    model_params: dict
+
+    @property
+    @abc.abstractmethod
+    def model_wrapper_class(self):
+        pass
+
+    @property
+    @abc.abstractmethod
+    def model_class(self):
+        pass
+
+    def instantiate_model(self, **model_instantiation_kwargs):
+        return self.model_wrapper_class(**model_instantiation_kwargs)
+
+    @property
+    def model_instantiation_kwargs(self):
+        return self.model_class(**self.model_params)
+
+class MultiOutputRegressorMixin(MultiModelWrapperMixin):
+    def model_wrapper_class(self):
+        return MultiOutputRegressor

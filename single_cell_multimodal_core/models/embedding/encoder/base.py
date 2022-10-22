@@ -42,7 +42,7 @@ class FullyConnectedEncoder(FullyConnectedMixin, EncoderABC):
         return fully_connected_sequential[0].in_features == self.input_dim and fully_connected_sequential[-2].out_features == self.latent_dim
 
 
-    def _build_fallback_fully_connected(self, shrinking_factors=(8, 2)):
+    def _build_fallback_fully_connected(self, shrinking_factors=(8, 2)): #todo
         hidden_dim = self.input_dim // shrinking_factors[0]
         return nn.Sequential(
             nn.Linear(self.input_dim, hidden_dim),
