@@ -2,14 +2,13 @@
 
 from typing import List, Tuple
 
-import numpy as np
+from numpy.typing import ArrayLike
 import torch
 import xarray as xr
-from scipy.sparse import csr_array
 from torch.utils.data import Dataset
 
 
-def as_numpy(t: torch.Tensor) -> np.array:
+def as_numpy(t: torch.Tensor) -> ArrayLike:
     return t.detach().cpu().numpy()
 
 
@@ -18,21 +17,20 @@ def as_tensor(arr: np.array) -> torch.Tensor:
 
 
 class BaseDataset(Dataset):
-    def __init__(self, mat: csr_array) -> None:
+    def __init__(self, mat: ArrayLike) -> None:
         self.mat = mat
-        self.mat.sort_indices()
         self.shape = self.mat.shape
 
     def __len__(self) -> int:
         return self.shape[0]
 
     def __getitem__(self, index) -> torch.Tensor:
-        arr = self.mat.getrow(index).toarray().ravel()
+        arr = self.mat[index, :].ravel()
         return as_tensor(arr)
 
 
 class IODataset(BaseDataset):
-    def __init__(self, mat: csr_array, ds: xr.Dataset, output_vars: List[str]) -> None:
+    def __init__(self, mat: ArrayLike, ds: xr.Dataset, output_vars: List[str]) -> None:
         super().__init__(mat)
         self.ds = ds
         self.output_vars = output_vars

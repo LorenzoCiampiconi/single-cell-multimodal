@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
-import logging
 
 #%% imports
 
+import logging
+
+import numpy as np
 import torch
 import pytorch_lightning as pl
 
 from pytorch_lightning import callbacks as cbs
 from pytorch_lightning.loggers import TensorBoardLogger
-from scipy import sparse
 from sklearn.decomposition import TruncatedSVD
 from torch import nn
 from torch.utils.data import DataLoader
@@ -33,41 +34,44 @@ config = {
     "num_workers": 0,
     "seed": 42,
     "max_epochs": 10,
+    "n_components": 64,
+    "latent_dim": 16,
+    "shrinking_factors": (8, 2),
 }
 
 
 #%% build datasets
 
-train_svd_caching_path = app_static_dir('cache') / 'svd_2000_train.npz'
-test_svd_caching_path = app_static_dir('cache') / 'svd_2000_test.npz'
+n_components = config["n_components"]
 
-svd = TruncatedSVD(n_components=2000, random_state=config['seed'])
+svd_caching_path = app_static_dir("cache") / f"svd_{n_components}.npz"
 
-if train_svd_caching_path.is_file():
-    logger.info('loading test reduced by svd from file')
-    train_ds = sparse.load_npz(train_svd_caching_path)
+if svd_caching_path.exists():
+    logger.info("loading inputs reduced by svd from file")
+    with np.load(svd_caching_path) as npz_file:
+        train_mat, test_mat = npz_file["train_mat"], npz_file["test_mat"]
 else:
+    logger.info(f"compute svd with {n_components} components")
+    svd = TruncatedSVD(n_components=n_components, random_state=config["seed"])
     train_mat = load_sparse(split="train", problem="cite", type="inputs")
-    train_ds = BaseDataset(svd.fit_transform(train_mat))
-    sparse.save_npz(train_svd_caching_path, train_ds)
-
-if test_svd_caching_path.is_file():
-    logger.info('loading test reduced by svd from file')
-    test_ds = sparse.load_npz(train_svd_caching_path)
-else:
     test_mat = load_sparse(split="test", problem="cite", type="inputs")
-    test_ds = BaseDataset(svd.transform(test_mat))
-    sparse.save_npz(test_svd_caching_path, test_ds)
+    train_mat = svd.fit_transform(train_mat)
+    test_mat = svd.transform(test_mat)
+    np.savez_compressed(svd_caching_path, train_mat=train_mat, test_mat=test_mat)
+
+
+train_ds = BaseDataset(train_mat)
+test_ds = BaseDataset(test_mat)
 
 
 #%% init model
 
 pl.seed_everything(config["seed"], workers=True)
 
-input_dim = 2000
-latent_dim = 64
+input_dim = n_components
+latent_dim = config["latent_dim"]
 activation_function = nn.SELU
-shrinking_factors = (8, 2)
+shrinking_factors = config["shrinking_factors"]
 hidden_dim = input_dim // shrinking_factors[0]
 
 encoder = FullyConnectedEncoder(
@@ -88,7 +92,7 @@ model = AutoEncoder(lr=config["lr"], encoder=encoder, decoder=decoder)
 
 #%% init trainer
 
-logger = TensorBoardLogger(settings["tensorboard"]["log"], name="autoencoder_test")  # , version="0")
+logger = TensorBoardLogger(settings["tensorboard"]["path"], name="autoencoder_test")  # , version="0")
 dsl = DataLoader(
     train_ds,
     batch_size=config["batch_size"],
