@@ -20,7 +20,7 @@ from single_cell_multimodal_core.utils.appdirs import app_static_dir
 logger = logging.getLogger(__name__)
 
 
-class SCMModelABC:
+class SCMModelABC(metaclass=abc.ABCMeta):
     invalid_test_index = 7476
 
     def __init__(self, configuration: Dict[str, Dict[str, Any]], label=""):
@@ -30,7 +30,7 @@ class SCMModelABC:
 
     @property
     def model_label(self):
-        return self._model_label
+        return f"{self.problem_label}_{self._model_label}"
 
     @property
     def is_trained(self):
@@ -38,6 +38,10 @@ class SCMModelABC:
 
     @property
     @abc.abstractmethod
+    def problem_label(self) -> str:
+        pass
+
+    @property
     def configuration(self):
         return self._configuration
 
@@ -97,7 +101,7 @@ class SCMModelABC:
             X_tr = X[idx_tr]
             y_tr = Y[idx_tr]
 
-            model = self.instantiate_model(self.model_instantiation_kwargs)
+            model = self.instantiate_model(**self.model_instantiation_kwargs)
             model.fit(X_tr, y_tr)
             del X_tr, y_tr
             gc.collect()
@@ -120,7 +124,7 @@ class SCMModelABC:
             f"{self.model_label} - Average  mse = {result_df.mse.mean():.5f}; corr = {result_df.corrscore.mean():.3f}"
         )
 
-        self._trained_model = self.instantiate_model(self.model_instantiation_kwargs).fit(X, Y)
+        self._trained_model = self.instantiate_model(**self.model_instantiation_kwargs).fit(X, Y)
 
         if save_model:
             model_path: Path = app_static_dir("saved_models") / f"model_{self.model_label}.pkl"
@@ -172,8 +176,10 @@ class MultiModelWrapperMixin(metaclass=abc.ABCMeta):
 
     @property
     def model_instantiation_kwargs(self):
-        return self.model_class(**self.model_params)
+        return {"estimator": self.model_class(**self.model_params)}
 
 class MultiOutputRegressorMixin(MultiModelWrapperMixin):
+
+    @property
     def model_wrapper_class(self):
         return MultiOutputRegressor

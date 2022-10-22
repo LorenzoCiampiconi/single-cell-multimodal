@@ -58,7 +58,7 @@ class FullyConnectedEncoder(FullyConnectedMixin, EncoderABC):
 
     def _reverse_sequential_layers(self):
         sequential_as_list = list(self._fc)
-        sequential_as_list[::2] = reversed(sequential_as_list[::2])
+        sequential_as_list[::2] = [nn.Linear(linear.out_features,linear.out_features) for linear in reversed(sequential_as_list[::2])]
         return sequential_as_list
 
     def mirror_sequential_for_decoding(self):

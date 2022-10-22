@@ -19,6 +19,10 @@ class CiteModelABC(SCMModelABC, metaclass=abc.ABCMeta):
         self._test_input = None
 
     @property
+    def problem_label(self) -> str:
+        return "cite"
+
+    @property
     def train_input(self) -> sparse.csr_array:
         if self._train_input is None:
             logger.info(f"{self.model_label} is loading training input from CITE dataset")

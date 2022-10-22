@@ -20,11 +20,11 @@ model_params = {
 
 cross_validation_params = {"n_splits_for_kfold": 10}
 
-svd_params = {"n_components": 64}
+svd_params = {"output_dimensionality": 64}
 
 configuration = {
     "cross_validation_params": cross_validation_params,
     "model_params": model_params,
-    "svd_params": svd_params,
+    "dimensionality_reduction_params": svd_params,
     "global_params": global_params,
 }
