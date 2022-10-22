@@ -6,7 +6,7 @@ import torch
 from torch import nn
 
 from single_cell_multimodal_core.models.embedding.decoder.base import FullyConnectedDecoder
-from single_cell_multimodal_core.models.embedding.nn import NNEntity
+from single_cell_multimodal_core.models.embedding.nn import NNEntity, FullyConnectedMixin
 from single_cell_multimodal_core.models.embedding.utils import init_fc_snn
 
 logger = logging.getLogger(__name__)
@@ -22,35 +22,25 @@ class EncoderABC(NNEntity, metaclass=abc.ABCMeta):
     def mirror_sequential_for_decoding(self):
         pass
 
-    def validate_input_sequential(self, fully_connected_sequential):
-        return True
-
-    @property
-    @abc.abstractmethod
-    def hashing_parameters(self):
-        pass
-
-    @property
-    @abc.abstractmethod
-    def encoding_hash(self):
-        pass
+    #
+    # @property
+    # @abc.abstractmethod
+    # def hashing_parameters(self):
+    #     pass
+    #
+    # def encoding_hash(self):
+    #     hash(str(self.__class__) + self.hashing_parameters)
 
 
-class FullyConnectedEncoder(EncoderABC):
-    def __init__(self, *, fully_connected_sequential=None, **kwargs):
+class FullyConnectedEncoder(FullyConnectedMixin, EncoderABC):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-        self._fc = fully_connected_sequential
+        self.sanitize_fc()
         self.reset_parameters()
 
-    def encoding_hash(self):
-        hash(str(self.__class__) + self.hashing_parameters)
+    def validate_input_sequential(self, fully_connected_sequential) -> bool:
+        return fully_connected_sequential[0].in_features == self.input_dim and fully_connected_sequential[-2].out_features == self.latent_dim
 
-    def forward(self, x):
-        return self._fc(x)
-
-    def reset_parameters(self):
-        self.apply(init_fc_snn)
 
     def _build_fallback_fully_connected(self, shrinking_factors=(8, 2)):
         hidden_dim = self.input_dim // shrinking_factors[0]

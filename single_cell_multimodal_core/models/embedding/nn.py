@@ -4,6 +4,8 @@ import logging
 import numpy as np
 from torch import nn
 
+from single_cell_multimodal_core.models.embedding.utils import init_fc_snn
+
 logger = logging.getLogger()
 
 
@@ -14,6 +16,9 @@ class NNEntity(nn.Module):
             activation_function = nn.ReLU
         self._activation_function = activation_function
 
+    def reset_parameters(self):
+        self.apply(init_fc_snn)
+
     @property
     def activation_function(self):
         return self._activation_function
@@ -22,7 +27,14 @@ class NNEntity(nn.Module):
     def depth(self) -> int:
         return np.NaN #todo
 
+class FullyConnectedSequentialNotInstatiated(Exception):
+    ...
+
 class FullyConnectedMixin(metaclass=abc.ABCMeta):
+    def __init__(self, fully_connected_sequential=None, build_fallback=True, **kwargs):
+        super().__init__(**kwargs)
+        self._build_fallback = build_fallback
+        self._fc = fully_connected_sequential
 
     @abc.abstractmethod
     def _build_fallback_fully_connected(self):
@@ -32,12 +44,22 @@ class FullyConnectedMixin(metaclass=abc.ABCMeta):
     def validate_input_sequential(self, fully_connected_sequential):
         pass
 
-    def sanitize_fully_connected_sequential(self, fully_connected_sequential):
-        if fully_connected_sequential is not None and not self.validate_input_sequential(fully_connected_sequential):  # todo
-            logger.debug(
-                "loading passed by argument sequential is not verified, a fallback fully connected layer will be built."
-            )
-            fully_connected_sequential = self._build_fallback_fully_connected()
+    def forward(self, x):
+        return self._fc(x)
+
+    def sanitize_fc(self):
+        if self._fc is not None:
+            ok = self.validate_input_sequential(self._fc)
+            if not ok:
+                logger.warning(
+                    "The instatiated sequential has not passed sanity checks"
+                )
+                if self._build_fallback:
+                    logger.warning("a fully connected fallback layer will be built.")
+                    self._fc = self._build_fallback_fully_connected()
+                else:
+                    assert(ok, "The instatiated sequential is not consistent with the expected constraint of the module. Abort")
+            else:
+                logger.debug("Instatiated sequential is verified and loaded.")
         else:
-            logger.debug("loading passed by argument sequential is verified and loaded.")
-        return fully_connected_sequential
+            raise FullyConnectedSequentialNotInstatiated()
