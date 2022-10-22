@@ -4,6 +4,7 @@
 
 # Extra Files
 /extra
+/log
 
 # Local settings
 settings.yaml

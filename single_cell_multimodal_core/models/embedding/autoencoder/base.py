@@ -26,7 +26,7 @@ class AutoEncoder(pl.LightningModule):
             ],
             prefix="recon_loss/val",
         )
-        self.save_hyperparameters()
+        self.save_hyperparameters(ignore=["encoder", "decoder"])
 
     def on_fit_start(self):
         self.recon_metrics = self.recon_metrics.cpu()
@@ -37,7 +37,7 @@ class AutoEncoder(pl.LightningModule):
         return y_hat
 
     def training_step(self, batch, batch_idx):
-        (x,), (y,) = batch
+        x = y = batch
         y_hat = self.forward(x)
 
         loss = self.recon_loss(y_hat, y)

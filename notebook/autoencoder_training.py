@@ -17,6 +17,7 @@ from single_cell_multimodal_core.data_handling import load_sparse
 from single_cell_multimodal_core.models.embedding.autoencoder.base import AutoEncoder
 
 from single_cell_multimodal_core.models.embedding.dataset import BaseDataset, as_numpy
+from single_cell_multimodal_core.models.embedding.decoder.base import FullyConnectedDecoder
 from single_cell_multimodal_core.models.embedding.encoder.base import FullyConnectedEncoder
 from single_cell_multimodal_core.utils.appdirs import app_static_dir
 from single_cell_multimodal_core.utils.log import settings, setup_logging
@@ -35,7 +36,7 @@ config = {
     "seed": 42,
     "max_epochs": 10,
     "n_components": 64,
-    "latent_dim": 16,
+    "latent_dim": 4,
     "shrinking_factors": (8, 2),
 }
 
@@ -86,7 +87,17 @@ encoder = FullyConnectedEncoder(
         activation_function(),
     ),
 )
-decoder = None
+decoder = FullyConnectedDecoder(
+    latent_dim=latent_dim,
+    fully_connected_sequential=nn.Sequential(
+        nn.Linear(latent_dim, hidden_dim // shrinking_factors[1]),
+        activation_function(),
+        nn.Linear(hidden_dim // (shrinking_factors[1]), hidden_dim),
+        activation_function(),
+        nn.Linear(hidden_dim, input_dim),
+        activation_function(),
+    ),
+)
 
 model = AutoEncoder(lr=config["lr"], encoder=encoder, decoder=decoder)
 
@@ -101,8 +112,8 @@ dsl = DataLoader(
     num_workers=config["num_workers"],
 )
 trainer = pl.Trainer(
-    accelerator="gpu",
-    devices=-1,
+    # accelerator="gpu",
+    # devices=-1,
     max_epochs=config["max_epochs"],
     deterministic=True,
     logger=logger,
@@ -136,17 +147,18 @@ trainer = pl.Trainer(
 
 trainer.fit(model, train_dataloaders=dsl)
 
+
 #%% predict
 
 out = trainer.predict(model, test_ds)
-# out = as_numpy(torch.cat(out)) for convinience
+# out = as_numpy(torch.cat(out)).reshape(-1, input_dim) for convinience
 
 #%% use single layer example (extract embedding)
 
 encoder = model.encoder.eval()
 
 with torch.no_grad():
-    out = as_numpy(torch.cat([encoder(x) for x in test_ds]))
+    out = as_numpy(torch.cat([encoder(x) for x in test_ds])).reshape(-1, latent_dim)
 
 #%% manual test
 

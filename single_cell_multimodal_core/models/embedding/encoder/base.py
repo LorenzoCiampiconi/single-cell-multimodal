@@ -31,6 +31,9 @@ class EncoderABC(NNEntity, metaclass=abc.ABCMeta):
     # def encoding_hash(self):
     #     hash(str(self.__class__) + self.hashing_parameters)
 
+    @property
+    def example_input_array(self):
+        return torch.randn((1, 1, self.input_dim))
 
 class FullyConnectedEncoder(FullyConnectedMixin, EncoderABC):
     def __init__(self, **kwargs):
