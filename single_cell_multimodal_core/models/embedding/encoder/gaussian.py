@@ -9,16 +9,26 @@ from single_cell_multimodal_core.models.embedding.encoder.base import FullyConne
 class GaussianFullyConnectedEncoder(FullyConnectedEncoder):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._encoding_layer, self._encoding_head_mu, self._encoding_head_log_var = self._instantiate_gaussian_multi_head()
+        (
+            self._encoding_layer,
+            self._encoding_head_mu,
+            self._encoding_head_log_var,
+        ) = self._instantiate_gaussian_multi_head()
 
         self.reset_parameters()
 
     def _instantiate_gaussian_multi_head(self):
-        return self.fc_model[:-2], self.fc_model[-2:], nn.Sequential(nn.Linear(20, self.latent_dim),nn.SELU(),) # todo check
+        return (
+            self.fc_model[:-2],
+            self.fc_model[-2:],
+            nn.Sequential(
+                nn.Linear(20, self.latent_dim),
+                nn.SELU(),
+            ),
+        )  # todo check
 
     def _forward_backbone(self, x):
         return self._encoding_layer(x)
-
 
     def forward(self, x):
         h = self._forward_backbone(x)

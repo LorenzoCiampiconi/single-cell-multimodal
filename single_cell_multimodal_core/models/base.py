@@ -81,7 +81,7 @@ class SCMModelABC:
     def svd_params(self):
         return self.configuration["svd_params"]
 
-    def apply_SVD(self, input, n_components=64):
+    def apply_dimensionality_reduction(self, input, n_components=64):
         svd = TruncatedSVD(n_components=n_components, random_state=self.seed)
         output = svd.fit_transform(input)
 
@@ -136,7 +136,7 @@ class SCMModelABC:
         X, Y = self.train_input, self.train_target
 
         logger.debug(f"{self.model_label} - applying SVD")
-        X = self.apply_SVD(X, **self.svd_params)
+        X = self.apply_dimensionality_reduction(X, **self.svd_params)
         logger.debug(f"{self.model_label} - applying SVD - Done")
 
         cv_results = self.cross_validation(X, Y, save_model=save_model)
@@ -146,7 +146,7 @@ class SCMModelABC:
         self.generate_public_test_output(Y_test)
 
     def predict_public_test(self) -> np.array:
-        X_test_reduced = self.apply_SVD(self.test_input, **self.svd_params)
+        X_test_reduced = self.apply_dimensionality_reduction(self.test_input, **self.svd_params)
         return self._trained_model.predict(X_test_reduced)
 
     def generate_public_test_output(self, test_output: np.array):

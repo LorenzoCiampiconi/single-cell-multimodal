@@ -3,8 +3,6 @@ import torch
 from torch import nn
 
 
-
-
 @torch.no_grad()
 def init_fc_snn(layer):
     if not isinstance(layer, nn.Linear) or isinstance(layer, nn.LazyLinear):

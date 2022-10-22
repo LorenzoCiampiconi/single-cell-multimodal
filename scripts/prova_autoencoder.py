@@ -7,9 +7,9 @@ from torch import nn
 input_dim = 2000
 latent_dim = 64
 activation_function = nn.SELU
-shrinking_factors = (8,2)
+shrinking_factors = (8, 2)
 hidden_dim = input_dim // shrinking_factors[0]
-lr=1e-3
+lr = 1e-3
 
 autoencoder = AutoEncoder(
     encoder=FullyConnectedEncoder(
@@ -22,7 +22,7 @@ autoencoder = AutoEncoder(
             activation_function(),
             nn.Linear(hidden_dim // shrinking_factors[1], latent_dim),
             activation_function(),
-        )
+        ),
     ),
-    lr=lr
+    lr=lr,
 )

@@ -6,18 +6,17 @@ import torch
 from torch import nn
 
 from single_cell_multimodal_core.models.embedding.decoder.base import FullyConnectedDecoder
+from single_cell_multimodal_core.models.embedding.nn import NNEntity
 from single_cell_multimodal_core.models.embedding.utils import init_fc_snn
 
 logger = logging.getLogger(__name__)
 
-class EncoderABC(nn.Module, metaclass=abc.ABCMeta):
-    def __init__(self, *, input_dim, latent_dim, activation_function=None):
+
+class EncoderABC(NNEntity, metaclass=abc.ABCMeta):
+    def __init__(self, *, input_dim, latent_dim, **kwargs):
         super().__init__()
         self.input_dim = input_dim
         self.latent_dim = latent_dim
-
-        if activation_function is None:
-            self.activation_function = nn.ReLU
 
     @abc.abstractmethod
     def mirror_sequential_for_decoding(self):
@@ -26,19 +25,26 @@ class EncoderABC(nn.Module, metaclass=abc.ABCMeta):
     def validate_input_sequential(self, fully_connected_sequential):
         return True
 
+    @property
+    @abc.abstractmethod
+    def hashing_parameters(self):
+        pass
+
+    @property
+    @abc.abstractmethod
+    def encoding_hash(self):
+        pass
+
 
 class FullyConnectedEncoder(EncoderABC):
     def __init__(self, *, fully_connected_sequential=None, **kwargs):
         super().__init__(**kwargs)
 
-        if fully_connected_sequential is None or not self.validate_input_sequential(fully_connected_sequential): #todo
-            logger.debug('loading passed by argument sequential is not verified, a fallback fully connected layer will be built.')
-            fully_connected_sequential = self._build_fallback_fully_connected()
-        else:
-            logger.debug('loading passed by argument sequential is verified and loaded.')
-
         self._fc = fully_connected_sequential
         self.reset_parameters()
+
+    def encoding_hash(self):
+        hash(str(self.__class__) + self.hashing_parameters)
 
     def forward(self, x):
         return self._fc(x)
@@ -46,7 +52,7 @@ class FullyConnectedEncoder(EncoderABC):
     def reset_parameters(self):
         self.apply(init_fc_snn)
 
-    def _build_fallback_fully_connected(self, shrinking_factors=(8,2)):
+    def _build_fallback_fully_connected(self, shrinking_factors=(8, 2)):
         hidden_dim = self.input_dim // shrinking_factors[0]
         return nn.Sequential(
             nn.Linear(self.input_dim, hidden_dim),
@@ -67,6 +73,7 @@ class FullyConnectedEncoder(EncoderABC):
         new_input_for_fresh_sequential = [deepcopy(e) for e in reversed_list_of_layer]
         mirrored_sequential = nn.Sequential(*new_input_for_fresh_sequential)
         return FullyConnectedDecoder(fully_connected_sequential=mirrored_sequential, latent_dim=self.latent_dim)
+
 
 # class ConvolutionalEncoder(nn.Module):
 #     def __init__(self, *, input_length: int, latent_dim: int):
