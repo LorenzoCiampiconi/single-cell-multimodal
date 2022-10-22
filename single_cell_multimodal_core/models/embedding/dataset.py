@@ -12,7 +12,7 @@ def as_numpy(t: torch.Tensor) -> ArrayLike:
     return t.detach().cpu().numpy()
 
 
-def as_tensor(arr: np.array) -> torch.Tensor:
+def as_tensor(arr: ArrayLike) -> torch.Tensor:
     return torch.tensor(arr).float()
 
 
