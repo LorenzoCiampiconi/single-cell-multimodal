@@ -1,5 +1,6 @@
 import logging
 
+import numpy as np
 import torch
 import pytorch_lightning as pl
 
@@ -17,29 +18,34 @@ from single_cell_multimodal_core.utils.log import settings
 
 logger = logging.getLogger(__name__)
 
+
 class AutoEncoderTrainer:
     seed: int
 
-    def __init__(self):
+    def __init__(self, input_dim, latent_dim, seed):
         # structural
-        self.n_components= 64
-        self.latent_dim = 4
+        self.input_dim= input_dim
+        self.latent_dim = latent_dim
         self.shrinking_factors = (8, 2)
         self.activation_function = nn.SELU
 
         # training
-        self.lr= 0.001,
+        self.lr= 0.001
         self.batch_size= 64
         self.num_workers= 0
         self.max_epochs= 10
         self.name = "autoencoder_test"
 
-        self.model = None
+        self.seed=seed #todo remove
+
+        self._fit = False
+
+        self.model=None
 
     def _build_model(self):
         pl.seed_everything(self.seed, workers=True)
 
-        input_dim = self.n_components
+        input_dim = self.input_dim
         latent_dim = self.latent_dim
         shrinking_factors = self.shrinking_factors
         hidden_dim = input_dim // shrinking_factors[0]
@@ -113,21 +119,33 @@ class AutoEncoderTrainer:
             ],
         )
 
-    def fit(self, mat: ArrayLike):
+    def is_fit(self) -> bool:
+        return self._fit
+
+    def fit(self, mat: ArrayLike) :
         self._build_model()
         self._init_trainer()
         self._build_data_loader(mat)
         self.trainer.fit(self.model, train_dataloaders=self.dsl)
+        self._fit = True
 
     def _predict(self, ds):
         out = self.trainer.predict(self.model, ds)
         out = as_numpy(torch.cat(out)).reshape(-1, self.input_dim) 
         return out
     
-    def embed(self, ds):
+    def transform(self, mat) -> np.array:
+        ds = BaseDataset(mat)
+        dslt = DataLoader(
+            ds,
+            batch_size=self.batch_size,
+            shuffle=False,
+            pin_memory=True,
+            num_workers=self.num_workers,
+        )
         encoder = self.model.encoder.eval()
 
         with torch.no_grad():
-            out = as_numpy(torch.cat([encoder(x) for x in ds])).reshape(-1, self.latent_dim)
+            out = as_numpy(torch.cat([encoder(x) for x in dslt])).reshape(-1, self.latent_dim)
         
         return out

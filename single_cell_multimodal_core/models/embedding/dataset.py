@@ -2,22 +2,22 @@
 
 from typing import List, Tuple
 
-from numpy.typing import ArrayLike
+from numpy.typing import NDArray
 import torch
 import xarray as xr
 from torch.utils.data import Dataset
 
 
-def as_numpy(t: torch.Tensor) -> ArrayLike:
+def as_numpy(t: torch.Tensor) -> NDArray:
     return t.detach().cpu().numpy()
 
 
-def as_tensor(arr: ArrayLike) -> torch.Tensor:
+def as_tensor(arr: NDArray) -> torch.Tensor:
     return torch.tensor(arr).float()
 
 
 class BaseDataset(Dataset):
-    def __init__(self, mat: ArrayLike) -> None:
+    def __init__(self, mat: NDArray) -> None:
         self.mat = mat
         self.shape = self.mat.shape
 
@@ -30,7 +30,7 @@ class BaseDataset(Dataset):
 
 
 class IODataset(BaseDataset):
-    def __init__(self, mat: ArrayLike, ds: xr.Dataset, output_vars: List[str]) -> None:
+    def __init__(self, mat: NDArray, ds: xr.Dataset, output_vars: List[str]) -> None:
         super().__init__(mat)
         self.ds = ds
         self.output_vars = output_vars

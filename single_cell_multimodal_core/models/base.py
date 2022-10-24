@@ -86,7 +86,11 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         return self.configuration["dimensionality_reduction_params"]
 
     @abc.abstractmethod
-    def apply_dimensionality_reduction(self, input, output_dimensionality=64):
+    def fit_and_apply_dimensionality_reduction(self, input, output_dimensionality=64):
+        ...
+
+    @abc.abstractmethod
+    def apply_dimensionality_reduction(self, input):
         ...
 
     def cross_validation(self, X, Y, save_model=False):
@@ -135,9 +139,12 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     def full_pipeline(self, save_model=False):
         X, Y = self.train_input, self.train_target
 
-        logger.debug(f"{self.model_label} - applying SVD")
-        X = self.apply_dimensionality_reduction(X, **self.dimensionality_reduction_params)
-        logger.debug(f"{self.model_label} - applying SVD - Done")
+        logger.debug(f"{self.model_label} - applying dimensionality reduction")
+        X = self.fit_and_apply_dimensionality_reduction(
+            input=X,
+            output_dimensionality=self.dimensionality_reduction_params['output_dimensionality']
+        )
+        logger.debug(f"{self.model_label} - applying dimensionality reduction - Done")
 
         cv_results = self.cross_validation(X, Y, save_model=save_model)
 
@@ -146,7 +153,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         self.generate_public_test_output(Y_test)
 
     def predict_public_test(self) -> np.array:
-        X_test_reduced = self.apply_dimensionality_reduction(self.test_input, **self.dimensionality_reduction_params)
+        X_test_reduced = self.apply_dimensionality_reduction(input=self.test_input)
         return self._trained_model.predict(X_test_reduced)
 
     def generate_public_test_output(self, test_output: np.array):
