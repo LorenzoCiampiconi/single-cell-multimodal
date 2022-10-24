@@ -141,8 +141,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
 
         logger.debug(f"{self.model_label} - applying dimensionality reduction")
         X = self.fit_and_apply_dimensionality_reduction(
-            input=X,
-            output_dimensionality=self.dimensionality_reduction_params['output_dimensionality']
+            input=X, output_dimensionality=self.dimensionality_reduction_params["output_dimensionality"]
         )
         logger.debug(f"{self.model_label} - applying dimensionality reduction - Done")
 
@@ -165,6 +164,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
             app_static_dir("out") / f"{self.model_label}_{datetime.now().strftime('%Y%m%d-%H%M')}_submission.csv"
         )
 
+
 class MultiModelWrapperMixin(metaclass=abc.ABCMeta):
     model_params: dict
 
@@ -185,8 +185,8 @@ class MultiModelWrapperMixin(metaclass=abc.ABCMeta):
     def model_instantiation_kwargs(self):
         return {"estimator": self.model_class(**self.model_params)}
 
-class MultiOutputRegressorMixin(MultiModelWrapperMixin):
 
+class MultiOutputRegressorMixin(MultiModelWrapperMixin):
     @property
     def model_wrapper_class(self):
         return MultiOutputRegressor

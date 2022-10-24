@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import pytorch_lightning as pl
 
-from numpy.typing  import ArrayLike
+from numpy.typing import ArrayLike
 from pytorch_lightning import callbacks as cbs
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch import nn
@@ -24,23 +24,23 @@ class AutoEncoderTrainer:
 
     def __init__(self, input_dim, latent_dim, seed):
         # structural
-        self.input_dim= input_dim
+        self.input_dim = input_dim
         self.latent_dim = latent_dim
         self.shrinking_factors = (8, 2)
         self.activation_function = nn.SELU
 
         # training
-        self.lr= 0.001
-        self.batch_size= 64
-        self.num_workers= 0
-        self.max_epochs= 10
+        self.lr = 0.001
+        self.batch_size = 64
+        self.num_workers = 0
+        self.max_epochs = 10
         self.name = "autoencoder_test"
 
-        self.seed=seed #todo remove
+        self.seed = seed  # todo remove
 
         self._fit = False
 
-        self.model=None
+        self.model = None
 
     def _build_model(self):
         pl.seed_everything(self.seed, workers=True)
@@ -77,7 +77,6 @@ class AutoEncoderTrainer:
 
         self.model = AutoEncoder(lr=self.lr, encoder=encoder, decoder=decoder)
 
-
     def _build_data_loader(self, mat):
         self.ds = BaseDataset(mat)
         self.dsl = DataLoader(
@@ -87,7 +86,6 @@ class AutoEncoderTrainer:
             pin_memory=True,
             num_workers=self.num_workers,
         )
-
 
     def _init_trainer(self):
         logger = TensorBoardLogger(settings["tensorboard"]["path"], name=self.name)
@@ -122,7 +120,7 @@ class AutoEncoderTrainer:
     def is_fit(self) -> bool:
         return self._fit
 
-    def fit(self, mat: ArrayLike) :
+    def fit(self, mat: ArrayLike):
         self._build_model()
         self._init_trainer()
         self._build_data_loader(mat)
@@ -131,9 +129,9 @@ class AutoEncoderTrainer:
 
     def _predict(self, ds):
         out = self.trainer.predict(self.model, ds)
-        out = as_numpy(torch.cat(out)).reshape(-1, self.input_dim) 
+        out = as_numpy(torch.cat(out)).reshape(-1, self.input_dim)
         return out
-    
+
     def transform(self, mat) -> np.array:
         ds = BaseDataset(mat)
         dslt = DataLoader(
@@ -147,5 +145,5 @@ class AutoEncoderTrainer:
 
         with torch.no_grad():
             out = as_numpy(torch.cat([encoder(x) for x in dslt])).reshape(-1, self.latent_dim)
-        
+
         return out

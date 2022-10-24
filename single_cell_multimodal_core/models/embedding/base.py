@@ -5,10 +5,11 @@ import numpy as np
 
 logger = logging.getLogger()
 
+
 class Embedder(metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
-    def is_fit(self) ->bool:
+    def is_fit(self) -> bool:
         pass
 
     @abc.abstractmethod
@@ -20,9 +21,9 @@ class Embedder(metaclass=abc.ABCMeta):
         pass
 
     def fit_transform(self, input) -> np.array:
-        logger.info('Embedder is being fit')
+        logger.info("Embedder is being fit")
         self.fit(input)
-        logger.info('Embedder has been fit - Done')
+        logger.info("Embedder has been fit - Done")
 
-        logger.info('Now transforming the input')
+        logger.info("Now transforming the input")
         return self.transform(input)

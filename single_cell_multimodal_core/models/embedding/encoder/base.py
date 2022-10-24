@@ -35,6 +35,7 @@ class EncoderABC(NNEntity, metaclass=abc.ABCMeta):
     def example_input_array(self):
         return torch.randn((1, 1, self.input_dim))
 
+
 class FullyConnectedEncoder(FullyConnectedMixin, EncoderABC):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -42,10 +43,12 @@ class FullyConnectedEncoder(FullyConnectedMixin, EncoderABC):
         self.reset_parameters()
 
     def validate_input_sequential(self, fully_connected_sequential) -> bool:
-        return fully_connected_sequential[0].in_features == self.input_dim and fully_connected_sequential[-2].out_features == self.latent_dim
+        return (
+            fully_connected_sequential[0].in_features == self.input_dim
+            and fully_connected_sequential[-2].out_features == self.latent_dim
+        )
 
-
-    def _build_fallback_fully_connected(self, shrinking_factors=(8, 2)): #todo
+    def _build_fallback_fully_connected(self, shrinking_factors=(8, 2)):  # todo
         hidden_dim = self.input_dim // shrinking_factors[0]
         return nn.Sequential(
             nn.Linear(self.input_dim, hidden_dim),
@@ -58,7 +61,9 @@ class FullyConnectedEncoder(FullyConnectedMixin, EncoderABC):
 
     def _reverse_sequential_layers(self):
         sequential_as_list = list(self._fc)
-        sequential_as_list[::2] = [nn.Linear(linear.out_features,linear.out_features) for linear in reversed(sequential_as_list[::2])]
+        sequential_as_list[::2] = [
+            nn.Linear(linear.out_features, linear.out_features) for linear in reversed(sequential_as_list[::2])
+        ]
         return sequential_as_list
 
     def mirror_sequential_for_decoding(self):

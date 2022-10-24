@@ -1,4 +1,6 @@
-from single_cell_multimodal_core.models.dimensionality_reduction.embedding import AutoEncoderDimensionalityReductionMixin
+from single_cell_multimodal_core.models.dimensionality_reduction.embedding import (
+    AutoEncoderDimensionalityReductionMixin,
+)
 from single_cell_multimodal_core.models.dimensionality_reduction.svd import TruncatedSVDMixin
 
 model_label = "lgbm_w_autoencoder"
@@ -27,7 +29,7 @@ dimensionality_reduction = {
     "output_dimensionality": 16,
     "multi_level_dimensionality": True,
     "dimensionality_reducers_class": [TruncatedSVDMixin, AutoEncoderDimensionalityReductionMixin],
-    "intermediate_dimensionalities": [64]
+    "intermediate_dimensionalities": [64],
 }
 
 configuration = {
@@ -35,5 +37,5 @@ configuration = {
     "model_params": model_params,
     "dimensionality_reduction_params": dimensionality_reduction,
     "global_params": global_params,
-    "intermediate_dim": 2000 #todo
+    "intermediate_dim": 2000,  # todo
 }

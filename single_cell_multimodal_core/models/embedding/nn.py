@@ -25,10 +25,12 @@ class NNEntity(nn.Module):
 
     @property
     def depth(self) -> int:
-        return np.NaN #todo
+        return np.NaN  # todo
+
 
 class FullyConnectedSequentialNotInstatiated(Exception):
     ...
+
 
 class FullyConnectedMixin(metaclass=abc.ABCMeta):
     def __init__(self, fully_connected_sequential=None, build_fallback=True, **kwargs):
@@ -51,14 +53,15 @@ class FullyConnectedMixin(metaclass=abc.ABCMeta):
         if self._fc is not None:
             ok = self.validate_input_sequential(self._fc)
             if not ok:
-                logger.warning(
-                    "The instatiated sequential has not passed sanity checks"
-                )
+                logger.warning("The instatiated sequential has not passed sanity checks")
                 if self._build_fallback:
                     logger.warning("a fully connected fallback layer will be built.")
                     self._fc = self._build_fallback_fully_connected()
                 else:
-                    assert(ok, "The instatiated sequential is not consistent with the expected constraint of the module. Abort")
+                    assert (
+                        ok,
+                        "The instatiated sequential is not consistent with the expected constraint of the module. Abort",
+                    )
             else:
                 logger.debug("Instatiated sequential is verified and loaded.")
         else:

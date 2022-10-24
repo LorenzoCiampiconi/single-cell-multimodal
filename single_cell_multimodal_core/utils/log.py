@@ -25,9 +25,7 @@ settings = {
         "format": "%(thin_white)s%(asctime)s %(log_color)s%(levelname)-5s%(thin_cyan)s%(name)-30s %(bold_white)s%(message)s%(reset)s",
         "date_format": "%m-%d %H:%M:%S",
     },
-    "tensorboard":{
-        "path": app_static_dir("log/tensorboard")
-    }
+    "tensorboard": {"path": app_static_dir("log/tensorboard")},
 }
 
 
