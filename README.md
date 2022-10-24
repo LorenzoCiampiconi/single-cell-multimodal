@@ -18,13 +18,26 @@ does not require some time dependent forecasting, while the private does.
 
 ## Ideas and Todos:
 
-- assess distribution of the inputs, with and without zeros
-- assess svd singular values behaviour
+- ~~assess distribution of the inputs, with and without zeros~~
+- ~~assess svd singular values behaviour~~
 - ~~extract a categorical matrix and clusterize input to augment feature data reduced by svd~~
-- consider, by statistical investigation (e.g. Gamma distribution), different objective function
-for LGBM, more generally how the target values do distribute
+- extend pipeline to Multiome problem
 - train an encoder-decoder model to embed input feature after more conservative SVD
     - basic encoder decoder
-    - multi task fashion: encoder decoder + multi-output regressor
-- verify multi policy to hid cell_type, in case it is hidden only for public test set, we can
-can leverage it in a multitask setting
+      - ~~implementation~~
+      - ~~pipeline integration~~
+      - tuning
+      - performance assessment
+    - multi task fashion:
+      - verify integration with pipeline
+      - add regression as a task
+      - add metadata prediction as task
+- verify multi policy to hid cell_type, in case it is hidden only for public test set, we can leverage it in a multitask setting
+- graph based feature extraction
+  - ~~build graph~~
+  - community detection based
+    - ~~implementation~~
+    - tuning
+  - convolution
+- consider, by statistical investigation (e.g. Gamma distribution), different objective function
+for LGBM, more generally how the target values do distribute
