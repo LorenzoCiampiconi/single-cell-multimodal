@@ -9,5 +9,5 @@ class LGBMwSVDCite(LGBMMixin, TruncateSVDEmbedderMixin, MultiOutputRegressorMixi
     ...
 
 
-class LGBMwSVDAutoEncoderCite(LGBMMixin, MultiLevelEmbedderMixin, MultiOutputRegressorMixin, CiteModelABC):
+class LGBMwMultilevelEmbedderCite(LGBMMixin, MultiLevelEmbedderMixin, MultiOutputRegressorMixin, CiteModelABC):
     ...
