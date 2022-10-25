@@ -25,7 +25,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
 
     def __init__(self, configuration: Dict[str, Dict[str, Any]], label=""):
         self._configuration = configuration
-        self._model_label = f"{self.__class__.__name__}-{label}" if label else self.__class__.__name__
+        self._model_label = f"{label}" if label else self.__class__.__name__
         self._trained_model = None
 
     @property

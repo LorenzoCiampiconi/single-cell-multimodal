@@ -1,4 +1,4 @@
-model_label = "lgbm_first_try"
+model_label = "lgbm_w_svd_baseline"
 
 global_params = {
     "seed": 0,
