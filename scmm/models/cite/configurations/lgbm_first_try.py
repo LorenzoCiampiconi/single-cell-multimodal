@@ -1,8 +1,7 @@
 model_label = "lgbm_w_svd_baseline"
+seed = 0
+original_dim = None
 
-global_params = {
-    "seed": 0,
-}
 
 model_params = {
     "learning_rate": 0.1,
@@ -20,11 +19,17 @@ model_params = {
 
 cross_validation_params = {"n_splits_for_kfold": 10}
 
-svd_params = {"output_dimensionality": 64}
+svd_params = {"output_dimensionality": 200}
+
+embedder_params = {
+    "seed": seed,
+    "input_dim": original_dim,
+    "output_dim": 200,
+}
 
 configuration = {
     "cross_validation_params": cross_validation_params,
     "model_params": model_params,
-    "dimensionality_reduction_params": svd_params,
-    "global_params": global_params,
+    "embedder_params": embedder_params,
+    "seed": seed,
 }
