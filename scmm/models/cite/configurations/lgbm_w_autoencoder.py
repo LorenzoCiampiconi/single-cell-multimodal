@@ -39,7 +39,7 @@ trainer_kwargs = {
 }
 net_params = {
     "lr": 1e-3,
-    "shrinking_factors": (8, 2),
+    "shrinking_factors": (5, 6),
     "activation_function": nn.SELU,
 }
 embedder_params = {
@@ -60,7 +60,7 @@ embedder_params = {
             {
                 "seed": seed,
                 "input_dim": 2000,
-                "output_dim": 64,
+                "output_dim": 66,
                 "model_params": net_params,
                 "train_params": {
                     "logger_kwargs": logger_kwargs,
