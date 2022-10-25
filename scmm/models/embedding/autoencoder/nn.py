@@ -64,4 +64,5 @@ class FullyConnectedMixin(metaclass=abc.ABCMeta):
             else:
                 logger.debug("Instatiated sequential is verified and loaded.")
         else:
-            raise FullyConnectedSequentialNotInstatiated()
+            exception_message = f"The object instatiation has produced no sequential, please check the class employing this mixin"
+            raise FullyConnectedSequentialNotInstatiated(exception_message)
