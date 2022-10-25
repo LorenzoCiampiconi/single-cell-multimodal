@@ -53,15 +53,14 @@ class FullyConnectedMixin(metaclass=abc.ABCMeta):
         if self._fc is not None:
             ok = self.validate_input_sequential(self._fc)
             if not ok:
-                logger.warning("The instatiated sequential has not passed sanity checks")
+                logger.warning("The instantiated sequential has not passed sanity checks")
                 if self._build_fallback:
                     logger.warning("a fully connected fallback layer will be built.")
                     self._fc = self._build_fallback_fully_connected()
                 else:
-                    assert (
-                        ok,
-                        "The instatiated sequential is not consistent with the expected constraint of the module. Abort",
-                    )
+                    exception_message = "The instantiated sequential is not consistent with the constraints of the module. Abort"
+                    logger.exception(exception_message)
+                    raise FullyConnectedSequentialNotInstatiated(exception_message)
             else:
                 logger.debug("Instatiated sequential is verified and loaded.")
         else:
