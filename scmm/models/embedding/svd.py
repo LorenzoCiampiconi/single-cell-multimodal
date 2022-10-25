@@ -21,4 +21,4 @@ class TruncatedSVDEmbedder(Embedder):
         self.fitted = True
 
     def transform(self, *, input) -> np.array:
-        return self.svd.transform(input=input)
+        return self.svd.transform(input)

@@ -1,10 +1,8 @@
 import logging
-from typing import Any, Dict
 
 import torch
 import pytorch_lightning as pl
 
-from numpy.typing import ArrayLike
 from torch import nn
 from scmm.models.embedding.autoencoder.full.base import AutoEncoder
 
@@ -17,39 +15,22 @@ from scmm.models.embedding.base import Embedder
 logger = logging.getLogger(__name__)
 
 
-class AutoEncoderEmbedder(AutoEncoderTrainer, Embedder):
-    def __init__(
-        self, *, seed: int, input_dim: int, output_dim: int, model_kwargs: Dict[str, Any], train_kwargs: Dict[str, Any]
-    ):
-        super().__init__(seed=seed, input_dim=input_dim, output_dim=output_dim)
-        self.latent_dim = output_dim
-        self.fitted = False
-
-        self.model_kwargs = model_kwargs
-        self.train_kwargs = train_kwargs
-
-        # model
-        self.shrinking_factors = (8, 2)
-        self.activation_function = nn.SELU
-
-        # training
-        self.lr = 0.001
-        self.batch_size = 64
-        self.num_workers = 0
-        self.max_epochs = 10
-        self.name = "basic_autoencoder_test"
-
-        self.model = self._build_model()
-        self._init_trainer()
-
-    def _build_model(self):
+class BasicAutoEncoderEmbedder(AutoEncoderTrainer, Embedder):
+    def build_model(self):
         pl.seed_everything(self.seed, workers=True)
 
         input_dim = self.input_dim
         latent_dim = self.latent_dim
-        shrinking_factors = self.shrinking_factors
+        shrinking_factors = self.model_params["shrinking_factors"]
+        activation_function = self.model_params["activation_function"]
+        lr = self.model_params["lr"]
+
         hidden_dim = input_dim // shrinking_factors[0]
-        activation_function = self.activation_function
+        final_dim = hidden_dim // shrinking_factors[1]
+
+        assert (
+            final_dim == latent_dim
+        ), f"Latent_dim ({latent_dim}) inconsitent with shinkring factors ({shrinking_factors})"
 
         encoder = FullyConnectedEncoder(
             input_dim=input_dim,
@@ -57,32 +38,27 @@ class AutoEncoderEmbedder(AutoEncoderTrainer, Embedder):
             fully_connected_sequential=nn.Sequential(
                 nn.Linear(input_dim, hidden_dim),
                 activation_function(),
-                nn.Linear(hidden_dim, hidden_dim // (shrinking_factors[1])),
+                nn.Linear(hidden_dim, final_dim),
                 activation_function(),
-                nn.Linear(hidden_dim // shrinking_factors[1], latent_dim),
+                nn.Linear(final_dim, latent_dim),
                 activation_function(),
             ),
         )
         decoder = FullyConnectedDecoder(
             latent_dim=latent_dim,
             fully_connected_sequential=nn.Sequential(
-                nn.Linear(latent_dim, hidden_dim // shrinking_factors[1]),
+                nn.Linear(latent_dim, final_dim),
                 activation_function(),
-                nn.Linear(hidden_dim // (shrinking_factors[1]), hidden_dim),
+                nn.Linear(final_dim, hidden_dim),
                 activation_function(),
                 nn.Linear(hidden_dim, input_dim),
                 activation_function(),
             ),
         )
 
-        return AutoEncoder(lr=self.lr, encoder=encoder, decoder=decoder)
+        return AutoEncoder(lr=lr, encoder=encoder, decoder=decoder)
 
     def _predict(self, ds):
         out = self.trainer.predict(self.model, ds)
         out = as_numpy(torch.cat(out)).reshape(-1, self.input_dim)
         return out
-
-    def fit(self, *, input: ArrayLike):
-        dsl = self._build_data_loader(input, shuffle=True)
-        self.trainer.fit(self.model, train_dataloaders=dsl)
-        self.fitted = True

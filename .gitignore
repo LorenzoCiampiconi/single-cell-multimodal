@@ -5,6 +5,7 @@
 # Extra Files
 /extra
 /log
+/saved_models
 
 # Local settings
 settings.yaml

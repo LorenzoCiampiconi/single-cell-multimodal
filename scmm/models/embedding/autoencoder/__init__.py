@@ -1,1 +1,1 @@
-from .full.concrete import AutoEncoderEmbedder
+from .full.concrete import BasicAutoEncoderEmbedder

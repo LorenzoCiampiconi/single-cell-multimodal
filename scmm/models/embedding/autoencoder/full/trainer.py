@@ -1,4 +1,6 @@
+import abc
 import logging
+from typing import Any, Dict
 
 import numpy as np
 import torch
@@ -15,25 +17,54 @@ from scmm.utils.log import settings
 logger = logging.getLogger(__name__)
 
 
-class AutoEncoderTrainer:
-    fitted: bool
-    max_epochs: int
+class AutoEncoderTrainer(metaclass=abc.ABCMeta):
+    def __init__(
+        self, *, seed: int, input_dim: int, output_dim: int, model_params: Dict[str, Any], train_params: Dict[str, Any]
+    ):
+        super().__init__(seed=seed, input_dim=input_dim, output_dim=output_dim)
+        self.latent_dim = output_dim
+        self.fitted = False
+
+        self._model_params = model_params
+        self._train_params = train_params
+
+        self.model = self.build_model()
+        self.init_trainer()
+
+    @abc.abstractmethod
+    def build_model():
+        ...
+
+    @property
+    def model_params(self):
+        return self._model_params
+
+    @property
+    def logger_kwargs(self):
+        return self._train_params["logger_kwargs"]
+
+    @property
+    def trainer_kwargs(self):
+        return self._train_params["trainer_kwargs"]
+
+    @property
+    def dataloader_kwargs(self):
+        return self._train_params["dataloader_kwargs"]
 
     def is_fit(self) -> bool:
         return self.fitted
 
-    def _init_trainer(self):
-        logger = TensorBoardLogger(settings["tensorboard"]["path"], name=self.name)
+    def init_trainer(self):
+        logger = TensorBoardLogger(settings["tensorboard"]["path"], **self.logger_kwargs)
         self.trainer = pl.Trainer(
-            # accelerator="gpu",
-            # devices=-1,
-            max_epochs=self.max_epochs,
             deterministic=True,
             logger=logger,
-            check_val_every_n_epoch=1,
-            val_check_interval=0.5,
-            log_every_n_steps=25,
-            gradient_clip_val=1,
+            # accelerator="gpu",
+            # max_epochs=10,
+            # check_val_every_n_epoch=1,
+            # val_check_interval=1,
+            # log_every_n_steps=50,
+            # gradient_clip_val=1,
             # detect_anomaly=True,
             # track_grad_norm=2,
             # limit_train_batches=0.5,
@@ -50,21 +81,28 @@ class AutoEncoderTrainer:
                 # cbs.RichProgressBar(),
                 # cbs.RichModelSummary(),
             ],
+            **self.trainer_kwargs,
         )
 
-    def _build_data_loader(self, mat, shuffle=False):
+    def build_data_loader(self, mat, shuffle=False):
         ds = BaseDataset(mat)
         dsl = DataLoader(
-            self.ds,
-            batch_size=self.batch_size,
+            ds,
             shuffle=shuffle,
             pin_memory=True,
-            num_workers=self.num_workers,
+            **self.dataloader_kwargs
+            # batch_size=64,
+            # num_workers=0,
         )
         return dsl
 
+    def fit(self, *, input: ArrayLike):
+        dsl = self.build_data_loader(input, shuffle=True)
+        self.trainer.fit(self.model, train_dataloaders=dsl)
+        self.fitted = True
+
     def transform(self, *, input: ArrayLike) -> np.array:
-        dsl = self._build_data_loader(input)
+        dsl = self.build_data_loader(input)
         encoder = self.model.encoder.eval()
 
         with torch.no_grad():

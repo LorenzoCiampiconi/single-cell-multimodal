@@ -23,7 +23,7 @@ class MultiLevelEmbedder(Embedder):
         self.fitted = False
 
     def transform(self, *, input) -> np.array:
-        for embedder in enumerate(self.embedders.values()):
+        for embedder in self.embedders.values():
             input = embedder.transform(input=input)
 
         return input
