@@ -52,15 +52,15 @@ embedder_params = {
             {
                 "seed": seed,
                 "input_dim": original_dim,
-                "output_dim": 64,
+                "output_dim": 2000,
             },
         ),
         (
             BasicAutoEncoderEmbedder,
             {
                 "seed": seed,
-                "input_dim": 64,
-                "output_dim": 4,
+                "input_dim": 2000,
+                "output_dim": 64,
                 "model_params": net_params,
                 "train_params": {
                     "logger_kwargs": logger_kwargs,
