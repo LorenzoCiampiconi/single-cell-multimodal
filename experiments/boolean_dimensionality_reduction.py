@@ -1,4 +1,4 @@
-from single_cell_multimodal_core.data_handling import load_sparse
+from scmm.utils.data_handling import load_sparse
 
 train_cite_input = load_sparse(split="train", problem="cite", type="inputs")
 

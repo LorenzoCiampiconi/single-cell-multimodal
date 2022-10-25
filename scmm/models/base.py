@@ -14,8 +14,8 @@ from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import KFold
 from sklearn.multioutput import MultiOutputRegressor
 
-from single_cell_multimodal_core.metrics import correlation_score
-from single_cell_multimodal_core.utils.appdirs import app_static_dir
+from scmm.utils.metrics import correlation_score
+from scmm.utils.appdirs import app_static_dir
 
 logger = logging.getLogger(__name__)
 
@@ -79,14 +79,14 @@ class SCMModelABC(metaclass=abc.ABCMeta):
 
     @property
     def seed(self):
-        return self.configuration["global_params"]["seed"]
+        return self.configuration["seed"]
 
     @property
-    def dimensionality_reduction_params(self):
-        return self.configuration["dimensionality_reduction_params"]
+    def embedder_params(self):
+        return self.configuration["embedder_params"]
 
     @abc.abstractmethod
-    def fit_and_apply_dimensionality_reduction(self, input, output_dimensionality=64):
+    def fit_and_apply_dimensionality_reduction(self, input):
         ...
 
     @abc.abstractmethod
@@ -140,9 +140,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         X, Y = self.train_input, self.train_target
 
         logger.debug(f"{self.model_label} - applying dimensionality reduction")
-        X = self.fit_and_apply_dimensionality_reduction(
-            input=X, output_dimensionality=self.dimensionality_reduction_params["output_dimensionality"]
-        )
+        X = self.fit_and_apply_dimensionality_reduction(input=X)
         logger.debug(f"{self.model_label} - applying dimensionality reduction - Done")
 
         cv_results = self.cross_validation(X, Y, save_model=save_model)
@@ -166,7 +164,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
 
 
 class MultiModelWrapperMixin(metaclass=abc.ABCMeta):
-    model_params: dict
+    model_params: Dict
 
     @property
     @abc.abstractmethod

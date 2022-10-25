@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from scipy import sparse
 
-from single_cell_multimodal_core.utils.appdirs import app_static_dir
+from scmm.utils.appdirs import app_static_dir
 
 
 """

@@ -5,9 +5,8 @@ from copy import deepcopy
 import torch
 from torch import nn
 
-from single_cell_multimodal_core.models.embedding.decoder.base import FullyConnectedDecoder
-from single_cell_multimodal_core.models.embedding.nn import NNEntity, FullyConnectedMixin
-from single_cell_multimodal_core.models.embedding.utils import init_fc_snn
+from scmm.models.embedding.autoencoder.decoder.base import FullyConnectedDecoder
+from scmm.models.embedding.autoencoder.nn import NNEntity, FullyConnectedMixin
 
 logger = logging.getLogger(__name__)
 

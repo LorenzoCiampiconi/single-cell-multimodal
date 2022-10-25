@@ -13,14 +13,14 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from sklearn.decomposition import TruncatedSVD
 from torch import nn
 from torch.utils.data import DataLoader
-from single_cell_multimodal_core.data_handling import load_sparse
-from single_cell_multimodal_core.models.embedding.autoencoder.base import AutoEncoder
+from scmm.utils.data_handling import load_sparse
+from scmm.models.embedding.autoencoder.full.base import AutoEncoder
 
-from single_cell_multimodal_core.models.embedding.dataset import BaseDataset, as_numpy
-from single_cell_multimodal_core.models.embedding.decoder.base import FullyConnectedDecoder
-from single_cell_multimodal_core.models.embedding.encoder.base import FullyConnectedEncoder
-from single_cell_multimodal_core.utils.appdirs import app_static_dir
-from single_cell_multimodal_core.utils.log import settings, setup_logging
+from scmm.models.embedding.autoencoder.full.dataset import BaseDataset, as_numpy
+from scmm.models.embedding.autoencoder.decoder.base import FullyConnectedDecoder
+from scmm.models.embedding.autoencoder.encoder.base import FullyConnectedEncoder
+from scmm.utils.appdirs import app_static_dir
+from scmm.utils.log import settings, setup_logging
 
 logger = logging.getLogger(__name__)
 

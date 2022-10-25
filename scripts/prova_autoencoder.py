@@ -1,5 +1,5 @@
-from single_cell_multimodal_core.models.embedding.autoencoder.base import AutoEncoder
-from single_cell_multimodal_core.models.embedding.encoder.base import FullyConnectedEncoder
+from scmm.models.embedding.autoencoder.base import AutoEncoder
+from scmm.models.embedding.encoder.base import FullyConnectedEncoder
 
 from torch import nn
 

@@ -2,8 +2,8 @@ import logging
 
 from torch import nn
 
-from single_cell_multimodal_core.models.embedding.nn import FullyConnectedMixin, NNEntity
-from single_cell_multimodal_core.models.embedding.utils import init_fc_snn
+from scmm.models.embedding.autoencoder.nn import FullyConnectedMixin, NNEntity
+from scmm.models.embedding.autoencoder.utils import init_fc_snn
 
 logger = logging.Logger(__name__)
 

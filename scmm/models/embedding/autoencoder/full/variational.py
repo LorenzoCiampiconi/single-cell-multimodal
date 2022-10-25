@@ -3,7 +3,7 @@ from typing import Any
 import torch
 from torch import nn, distributions as td
 
-from single_cell_multimodal_core.models.embedding.autoencoder.base import AutoEncoder
+from scmm.models.embedding.autoencoder.base import AutoEncoder
 
 
 class VariationalAutoEncoder(AutoEncoder):

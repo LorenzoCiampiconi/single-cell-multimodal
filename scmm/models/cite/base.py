@@ -4,8 +4,8 @@ import logging
 import numpy as np
 from scipy import sparse
 
-from single_cell_multimodal_core.data_handling import load_sparse
-from single_cell_multimodal_core.models.base import SCMModelABC
+from scmm.utils.data_handling import load_sparse
+from scmm.models.base import SCMModelABC
 
 logger = logging.getLogger(__name__)
 

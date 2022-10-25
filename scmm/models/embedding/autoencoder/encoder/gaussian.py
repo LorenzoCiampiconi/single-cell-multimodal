@@ -3,7 +3,7 @@ import abc
 import torch
 from torch import nn, distributions as td
 
-from single_cell_multimodal_core.models.embedding.encoder.base import FullyConnectedEncoder
+from scmm.models.embedding.autoencoder.encoder.base import FullyConnectedEncoder
 
 
 class GaussianFullyConnectedEncoder(FullyConnectedEncoder):

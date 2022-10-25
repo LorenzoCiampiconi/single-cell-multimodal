@@ -4,7 +4,7 @@ import logging
 import numpy as np
 from torch import nn
 
-from single_cell_multimodal_core.models.embedding.utils import init_fc_snn
+from scmm.models.embedding.autoencoder.utils import init_fc_snn
 
 logger = logging.getLogger()
 
