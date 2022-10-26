@@ -19,12 +19,12 @@ model_params = {
 
 cv_params = {"n_splits_for_kfold": 10}
 
-svd_params = {"output_dimensionality": 200}
+svd_params = {"output_dimensionality": 64}
 
 embedder_params = {
     "seed": seed,
     "input_dim": original_dim,
-    "output_dim": 200,
+    "output_dim": 64,
 }
 
 configuration = {

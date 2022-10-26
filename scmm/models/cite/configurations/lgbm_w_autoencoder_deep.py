@@ -31,7 +31,7 @@ dataloader_kwargs = {
 }
 trainer_kwargs = {
     # "accelerator": "gpu",
-    "max_epochs": 1,
+    "max_epochs": 25,
     "check_val_every_n_epoch": 1,
     # "val_check_interval": 1,
     "log_every_n_steps": 50,
@@ -39,7 +39,7 @@ trainer_kwargs = {
 }
 net_params = {
     "lr": 1e-3,
-    "shrinking_factors": (2, 4, 4),
+    "shrinking_factors": (2, 2, 2, 2, 2),
     "activation_function": nn.SELU,
 }
 

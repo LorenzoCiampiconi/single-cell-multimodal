@@ -108,5 +108,5 @@ class AutoEncoderTrainer(metaclass=abc.ABCMeta):
 
         with torch.no_grad():
             out = as_numpy(torch.cat([encoder(x) for x in dsl])).reshape(-1, self.latent_dim)
-
+        logger.info('Autoencoder has transformed the input')
         return out
