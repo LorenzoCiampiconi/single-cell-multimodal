@@ -17,7 +17,7 @@ model_params = {
     "min_child_samples": 263,
 }
 
-cross_validation_params = {"n_splits_for_kfold": 10}
+cv_params = {"n_splits_for_kfold": 10}
 
 svd_params = {"output_dimensionality": 200}
 
@@ -28,7 +28,7 @@ embedder_params = {
 }
 
 configuration = {
-    "cross_validation_params": cross_validation_params,
+    "cv_params": cv_params,
     "model_params": model_params,
     "embedder_params": embedder_params,
     "seed": seed,
