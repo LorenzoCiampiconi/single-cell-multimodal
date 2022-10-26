@@ -19,7 +19,7 @@ DATA = pathlib.Path("../data")
 # In[3]:
 
 
-metadata = pd.read_csv("/Users/lciampiconi/PycharmProjects/kaggle/single-cell-multimodal/metadata.csv")
+metadata = pd.read_csv("/data/metadata.csv")
 
 
 # In[4]:
