@@ -11,10 +11,6 @@ from scmm.utils.caching import caching_function
 logger = logging.getLogger(__name__)
 
 
-def _load_svd_model(self, file):
-    return joblib.load(file)
-
-
 class TruncatedSVDEmbedder(Embedder):
     def __init__(self, *, seed: int, input_dim: int, output_dim: int, **kwargs):
         super().__init__(seed=seed, input_dim=input_dim, output_dim=output_dim)
