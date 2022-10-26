@@ -1,5 +1,5 @@
-from scmm.models.cite.concrete import LGBMwMultilevelEmbedderCite
-from scmm.models.cite.configurations.lgbm_w_autoencoder_small import configuration, model_label
+from scmm.problems.cite.concrete import LGBMwMultilevelEmbedderCite
+from scmm.problems.cite.configurations.lgbm_w_autoencoder_small import configuration, model_label
 from scmm.utils.log import setup_logging
 
 if __name__ == "__main__":
@@ -7,6 +7,3 @@ if __name__ == "__main__":
     model_wrapper = LGBMwMultilevelEmbedderCite(configuration=configuration, label=model_label)
 
     model_wrapper.full_pipeline(save_model=True)
-
-
-

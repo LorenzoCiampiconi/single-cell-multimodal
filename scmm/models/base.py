@@ -9,7 +9,6 @@ import pandas as pd
 from pathlib import Path
 import pickle as pkl
 from scipy import sparse
-from sklearn.decomposition import TruncatedSVD
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import KFold
 from sklearn.multioutput import MultiOutputRegressor
@@ -70,8 +69,8 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         pass
 
     @property
-    def cross_validation_params(self):
-        return self.configuration["cross_validation_params"]
+    def cv_params(self):
+        return self.configuration["cv_params"]
 
     @property
     def model_params(self):
@@ -85,18 +84,16 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     def embedder_params(self):
         return self.configuration["embedder_params"]
 
-    @abc.abstractmethod
     def fit_and_apply_dimensionality_reduction(self, input):
-        ...
+        return input
 
-    @abc.abstractmethod
     def apply_dimensionality_reduction(self, input):
-        ...
+        return input
 
     def cross_validation(self, X, Y, save_model=False):
         logger.info(f"{self.model_label} - performing cross validation")
 
-        kf = KFold(n_splits=self.cross_validation_params["n_splits_for_kfold"], shuffle=True, random_state=self.seed)
+        kf = KFold(n_splits=self.cv_params["n_splits_for_kfold"], shuffle=True, random_state=self.seed)
         score_list = []
 
         for fold, (idx_tr, idx_va) in enumerate(kf.split(X)):

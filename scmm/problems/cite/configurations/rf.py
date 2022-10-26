@@ -6,9 +6,7 @@ model_label = "rf"
 seed = 0
 original_dim = None
 
-model_params = {
-
-}
+model_params = {}
 
 cross_validation_params = {"n_splits_for_kfold": 10}
 
