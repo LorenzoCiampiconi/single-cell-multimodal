@@ -8,7 +8,7 @@ logger = logging.getLogger()
 
 
 class Embedder(metaclass=abc.ABCMeta):
-    fitted: bool
+    is_fit: bool
 
     def __init__(self, *, seed: int, input_dim: int, output_dim: int):
         self.seed = seed
@@ -31,15 +31,17 @@ class Embedder(metaclass=abc.ABCMeta):
         logger.info(
             f"{self.__class__.__name__} is being fit with input_dim={self.input_dim} and latent_dim={self.output_dim}"
         )
-        self.fit(input=input)
+        fitted_embedder = self.fit(input=input)
         self.fitted = True
         logger.info("Embedder has been fit - Done")
 
         logger.info("Now transforming the input")
-        return self.transform(input=input)
+        return fitted_embedder.transform(input=input), fitted_embedder
 
 
 class EmbedderWrapperMixin(metaclass=abc.ABCMeta):
+    configuration: dict
+
     @property
     @abc.abstractmethod
     def embedder_class(self) -> Type[Embedder]:
@@ -51,7 +53,8 @@ class EmbedderWrapperMixin(metaclass=abc.ABCMeta):
 
     def fit_and_apply_dimensionality_reduction(self, *, input):
         self.embedder = self.embedder_class(**self.embedder_kwargs)
-        return self.embedder.fit_transform(input=input)
+        out, self.embedder = self.embedder.fit_transform(input=input)
+        return out
 
     def apply_dimensionality_reduction(self, input):
         return self.embedder.transform(input=input)

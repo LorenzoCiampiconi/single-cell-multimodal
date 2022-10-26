@@ -58,11 +58,15 @@ class FullyConnectedMixin(metaclass=abc.ABCMeta):
                     logger.warning("a fully connected fallback layer will be built.")
                     self._fc = self._build_fallback_fully_connected()
                 else:
-                    exception_message = "The instantiated sequential is not consistent with the constraints of the module. Abort"
+                    exception_message = (
+                        "The instantiated sequential is not consistent with the constraints of the module. Abort"
+                    )
                     logger.exception(exception_message)
                     raise FullyConnectedSequentialNotInstatiated(exception_message)
             else:
                 logger.debug("Instatiated sequential is verified and loaded.")
         else:
-            exception_message = f"The object instatiation has produced no sequential, please check the class employing this mixin"
+            exception_message = (
+                f"The object instatiation has produced no sequential, please check the class employing this mixin"
+            )
             raise FullyConnectedSequentialNotInstatiated(exception_message)

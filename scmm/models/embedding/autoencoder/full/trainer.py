@@ -32,7 +32,7 @@ class AutoEncoderTrainer(metaclass=abc.ABCMeta):
         self.init_trainer()
 
     @abc.abstractmethod
-    def build_model():
+    def build_model(self):
         ...
 
     @property
@@ -100,6 +100,7 @@ class AutoEncoderTrainer(metaclass=abc.ABCMeta):
         dsl = self.build_data_loader(input, shuffle=True)
         self.trainer.fit(self.model, train_dataloaders=dsl)
         self.fitted = True
+        return self
 
     def transform(self, *, input: ArrayLike) -> np.array:
         dsl = self.build_data_loader(input)

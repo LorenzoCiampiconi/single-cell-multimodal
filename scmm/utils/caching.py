@@ -17,7 +17,14 @@ def np_load_wrapper(svd_caching_path):
 
 
 def caching_function(
-    *, file_label, file_extension, loading_function, saving_function, labelling_kwargs: Iterable[str], cache_folder=None, object_labelling_attributes=None
+    *,
+    file_label,
+    file_extension,
+    loading_function,
+    saving_function,
+    labelling_kwargs: Iterable[str],
+    cache_folder=None,
+    object_labelling_attributes=None,
 ):
     def decorator(fun):
         @wraps(fun)
@@ -47,7 +54,7 @@ def caching_function(
                 return loading_function(caching_file)
             else:
                 returning_value = fun(*args, **kwargs)
-                logger.info(f'caching {returning_value} into {caching_file}')
+                logger.info(f"caching {returning_value} into {caching_file}")
                 saving_function(returning_value, caching_file)
                 return returning_value
 

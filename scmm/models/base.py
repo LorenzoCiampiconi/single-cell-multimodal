@@ -155,7 +155,9 @@ class SCMModelABC(metaclass=abc.ABCMeta):
 
     def generate_public_test_output(self, test_output: np.array):
         test_output[:7476] = 0
-        submission = pd.read_csv(app_static_dir("data") / "sample_submission.csv", index_col="row_id").squeeze("columns")
+        submission = pd.read_csv(app_static_dir("data") / "sample_submission.csv", index_col="row_id").squeeze(
+            "columns"
+        )
         submission.iloc[: len(test_output.ravel())] = test_output.ravel()
         assert not submission.isna().any()
         submission.to_csv(

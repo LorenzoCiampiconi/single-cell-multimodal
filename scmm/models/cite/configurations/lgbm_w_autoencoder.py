@@ -39,28 +39,31 @@ trainer_kwargs = {
 }
 net_params = {
     "lr": 1e-3,
-    "shrinking_factors": (5, 6),
+    "shrinking_factors": (4, 4, 2),
     "activation_function": nn.SELU,
 }
+
+latent_dim = 64
+
 embedder_params = {
     "seed": seed,
     "input_dim": original_dim,
-    "output_dim": 4,
+    "output_dim": latent_dim,
     "embedders_config": [
         (
             TruncatedSVDEmbedder,
             {
                 "seed": seed,
                 "input_dim": original_dim,
-                "output_dim": 2000,
+                "output_dim": 2048,
             },
         ),
         (
             BasicAutoEncoderEmbedder,
             {
                 "seed": seed,
-                "input_dim": 2000,
-                "output_dim": 66,
+                "input_dim": 2048,
+                "output_dim": latent_dim,
                 "model_params": net_params,
                 "train_params": {
                     "logger_kwargs": logger_kwargs,
@@ -71,6 +74,18 @@ embedder_params = {
         ),
     ],
 }
+
+for embedder_config in embedder_params["embedders_config"]:
+    if "model_params" in embedder_config[1] and "shrinking_factors" in embedder_config[1]["model_params"]:
+        input_dim = embedder_config[1]["input_dim"]
+        output_dim = embedder_config[1]["output_dim"]
+
+        final_dim = input_dim
+        for factor in embedder_config[1]["model_params"]["shrinking_factors"]:
+            final_dim = final_dim // factor
+
+        assert final_dim == output_dim
+
 
 configuration = {
     "cross_validation_params": cross_validation_params,

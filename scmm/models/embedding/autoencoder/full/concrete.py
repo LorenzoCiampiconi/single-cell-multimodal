@@ -19,42 +19,40 @@ class BasicAutoEncoderEmbedder(AutoEncoderTrainer, Embedder):
     def build_model(self):
         pl.seed_everything(self.seed, workers=True)
 
-        input_dim = self.input_dim
-        latent_dim = self.latent_dim
-        shrinking_factors = self.model_params["shrinking_factors"]
-        activation_function = self.model_params["activation_function"]
         lr = self.model_params["lr"]
 
-        hidden_dim = input_dim // shrinking_factors[0]
-        final_dim = hidden_dim // shrinking_factors[1]
+        decoder = None
+        if "encoder_sequential" in self.model_params:
+            encoder = self.model_params["encoder_sequential"]
+            if "decoder_sequential" in self.model_params:
+                decoder = self.model_params["decoder_sequential"]
+        else:
+            shrinking_factors = self.model_params["shrinking_factors"]
+            activation_function = self.model_params["activation_function"]
 
-        assert (
-            final_dim == latent_dim
-        ), f"Latent_dim ({latent_dim}) inconsitent with shinkring factors ({shrinking_factors})"
+            input_dim = self.input_dim
+            latent_dim = self.latent_dim
 
-        encoder = FullyConnectedEncoder(
-            input_dim=input_dim,
-            latent_dim=latent_dim,
-            fully_connected_sequential=nn.Sequential(
-                nn.Linear(input_dim, hidden_dim),
-                activation_function(),
-                nn.Linear(hidden_dim, final_dim),
-                activation_function(),
-                nn.Linear(final_dim, latent_dim),
-                activation_function(),
-            ),
-        )
-        decoder = FullyConnectedDecoder(
-            latent_dim=latent_dim,
-            fully_connected_sequential=nn.Sequential(
-                nn.Linear(latent_dim, final_dim),
-                activation_function(),
-                nn.Linear(final_dim, hidden_dim),
-                activation_function(),
-                nn.Linear(hidden_dim, input_dim),
-                activation_function(),
-            ),
-        )
+            dims = [input_dim]
+            for shrinking_factor in shrinking_factors:
+                hidden_dim = dims[-1] // shrinking_factor
+                dims.append(hidden_dim)
+
+            final_dim = dims[-1]
+
+            assert (
+                final_dim == latent_dim
+            ), f"Latent_dim ({latent_dim}) inconsitent with shinkring factors ({shrinking_factors})"
+
+            encoder_sequential = nn.Sequential(
+                *[x for y in [[nn.Linear(i, o), activation_function()] for i, o in zip(dims[:-1], dims[1:])] for x in y]
+            )
+
+            encoder = FullyConnectedEncoder(
+                input_dim=self.input_dim,
+                latent_dim=self.latent_dim,
+                fully_connected_sequential=encoder_sequential,
+            )
 
         return AutoEncoder(lr=lr, encoder=encoder, decoder=decoder)
 
