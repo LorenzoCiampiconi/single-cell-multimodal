@@ -96,7 +96,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     def cross_validation(self, X, Y, save_model=False):
         logger.info(f"{self.model_label} - performing cross validation")
 
-        kf = KFold(n_splits=self.cross_validation_params["n_splits_for_kfold"], shuffle=True, random_state=1)
+        kf = KFold(n_splits=self.cross_validation_params["n_splits_for_kfold"], shuffle=True, random_state=self.seed)
         score_list = []
 
         for fold, (idx_tr, idx_va) in enumerate(kf.split(X)):
