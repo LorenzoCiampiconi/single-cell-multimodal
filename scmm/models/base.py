@@ -1,26 +1,21 @@
 import abc
-from datetime import datetime
-import gc
 import logging
-from typing import Dict, Any
+from datetime import datetime
+from typing import Any, Dict
 
 import numpy as np
 import pandas as pd
-from pathlib import Path
-import pickle as pkl
 from scipy import sparse
-from sklearn.metrics import mean_squared_error
-from sklearn.model_selection import KFold
-from sklearn.multioutput import MultiOutputRegressor
-
-from scmm.utils.metrics import correlation_score
 from scmm.utils.appdirs import app_static_dir
+from scmm.utils.scikit_crossval import cross_validate
+from sklearn.multioutput import MultiOutputRegressor
 
 logger = logging.getLogger(__name__)
 
 
 class SCMModelABC(metaclass=abc.ABCMeta):
-    invalid_test_index = 7476
+    invalid_test_index: int = 7476
+    public_test_index: int
 
     def __init__(self, configuration: Dict[str, Dict[str, Any]], label=""):
         self._configuration = configuration
@@ -90,61 +85,36 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     def apply_dimensionality_reduction(self, input):
         return input
 
-    def cross_validation(self, X, Y, save_model=False):
-        logger.info(f"{self.model_label} - performing cross validation")
+    def cross_validation(self, X, Y, **kwargs):
+        # TODO with strategy: {self.cv_params['strategy']}")
+        instantiate_model = lambda: self.instantiate_model(**self.model_instantiation_kwargs)
+        cv_raw = cross_validate(instantiate_model, X, Y, **self.cv_params)
+        cv_out = self.process_cv_out(cv_raw)
+        return cv_out
 
-        kf = KFold(n_splits=self.cv_params["n_splits_for_kfold"], shuffle=True, random_state=self.seed)
-        score_list = []
+    def process_cv_out(self, cv_raw):
+        return pd.DataFrame(cv_raw)
 
-        for fold, (idx_tr, idx_va) in enumerate(kf.split(X)):
-            model = None
-            gc.collect()
-            X_tr = X[idx_tr]
-            y_tr = Y[idx_tr]
-
-            model = self.instantiate_model(**self.model_instantiation_kwargs)
-            model.fit(X_tr, y_tr)
-            del X_tr, y_tr
-            gc.collect()
-
-            # We validate the model_wrapper
-            X_va = X[idx_va]
-            y_va = Y[idx_va]
-
-            y_va_pred = model.predict(X_va)
-            # va_pred.append(y_va_pred)
-            mse = mean_squared_error(y_va, y_va_pred)
-            corr_score = correlation_score(y_va, y_va_pred)
-            del X_va, y_va
-
-            logger.info(f"{self.model_label} - Fold {fold}: mse = {mse:.5f}, corr =  {corr_score:.3f}")
-            score_list.append((mse, corr_score))
-
-        result_df = pd.DataFrame(score_list, columns=["mse", "corrscore"])
-        logger.info(
-            f"{self.model_label} - Average  mse = {result_df.mse.mean():.5f}; corr = {result_df.corrscore.mean():.3f}"
-        )
-
+    def fit_model(self, X, Y):
         self._trained_model = self.instantiate_model(**self.model_instantiation_kwargs).fit(X, Y)
 
-        if save_model:
-            model_path: Path = app_static_dir("saved_models") / f"model_{self.model_label}.pkl"
-            model_path.write_bytes(pkl.dumps(self._trained_model))
-
-        return result_df
-
-    def full_pipeline(self, save_model=False):
+    def full_pipeline(self, refit=True):
         X, Y = self.train_input, self.train_target
 
         logger.debug(f"{self.model_label} - applying dimensionality reduction")
         X = self.fit_and_apply_dimensionality_reduction(input=X)
         logger.debug(f"{self.model_label} - applying dimensionality reduction - Done")
 
-        cv_results = self.cross_validation(X, Y, save_model=save_model)
+        logger.info(f"{self.model_label} - performing cross validation")
+        cv_out = self.cross_validation(X, Y)
+        logger.info(f"{self.model_label} - Average  metrics: " + " | ".join([f"({k})={v:.4}" for k, v in cv_out.mean().items()]))
 
-        Y_test = self.predict_public_test()
+        if refit:
+            self.fit_model(X, Y)
+            Y_test = self.predict_public_test()
+            self.generate_public_test_output(Y_test)
 
-        self.generate_public_test_output(Y_test)
+        return cv_out
 
     def predict_public_test(self) -> np.array:
         X_test_reduced = self.apply_dimensionality_reduction(input=self.test_input)
@@ -155,7 +125,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         submission = pd.read_csv(app_static_dir("data") / "sample_submission.csv", index_col="row_id").squeeze(
             "columns"
         )
-        submission.iloc[: len(test_output.ravel())] = test_output.ravel()
+        submission.iloc[self.public_test_index : len(test_output.ravel())] = test_output.ravel()
         assert not submission.isna().any()
         submission.to_csv(
             app_static_dir("out") / f"{self.model_label}_{datetime.now().strftime('%Y%m%d-%H%M')}_submission.csv"

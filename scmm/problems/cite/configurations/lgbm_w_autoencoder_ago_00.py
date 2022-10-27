@@ -1,5 +1,6 @@
 from scmm.models.embedding.autoencoder import BasicAutoEncoderEmbedder
 from scmm.models.embedding.svd import TruncatedSVDEmbedder
+from scmm.problems.metrics import common_metrics
 from torch import nn
 
 model_label = "lgbm_w_autoencoder_ago"
@@ -20,14 +21,14 @@ model_params = {
     "min_child_samples": 263,
 }
 
-cv_params = {"n_splits_for_kfold": 10}
+cv_params = {"cv": 3, "scoring": common_metrics, "verbose": 10}
 
 logger_kwargs = {
     "name": "basic_autoencoder",
 }
 dataloader_kwargs = {
     "batch_size": 64,
-    "num_workers": 0,
+    "num_workers": 4,
 }
 trainer_kwargs = {
     "accelerator": "gpu",
