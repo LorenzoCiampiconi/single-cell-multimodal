@@ -22,7 +22,7 @@ settings = {
         "log_path_to_file": app_static_dir("log/main") / "info.log",
         "level": "INFO",
         "column_width": 8000,
-        "format": "%(thin_white)s%(asctime)s %(log_color)s%(levelname)-5s%(thin_cyan)s%(name)-30s %(bold_white)s%(message)s%(reset)s",
+        "format": "%(thin_white)s%(asctime)s %(log_color)s%(levelname)-6s %(thin_cyan)s%(name)-30s %(bold_white)s%(message)s%(reset)s",
         "date_format": "%m-%d %H:%M:%S",
     },
     "tensorboard": {"path": app_static_dir("log/tensorboard")},
