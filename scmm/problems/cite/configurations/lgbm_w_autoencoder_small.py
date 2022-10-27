@@ -20,7 +20,7 @@ model_params = {
     "min_child_samples": 263,
 }
 
-cross_validation_params = {"n_splits_for_kfold": 10}
+cv_params = {"n_splits_for_kfold": 10}
 
 logger_kwargs = {
     "name": "basic_autoencoder",
@@ -88,7 +88,7 @@ for embedder_config in embedder_params["embedders_config"]:
 
 
 configuration = {
-    "cross_validation_params": cross_validation_params,
+    "cv_params": cv_params,
     "model_params": model_params,
     "embedder_params": embedder_params,
     "seed": seed,

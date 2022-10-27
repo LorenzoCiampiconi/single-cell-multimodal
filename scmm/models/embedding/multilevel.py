@@ -34,7 +34,7 @@ class MultiLevelEmbedder(Embedder):
     def fit(self, *, input):
         self._fitted_embedder = []
         for embedder, kwargs in self.embedders_config:
-            embedder = embedder(**kwargs).fit(input=input)
+            input, embedder = embedder(**kwargs).fit_transform(input=input)
             self._fitted_embedder.append(embedder)
 
         self.fitted = True
