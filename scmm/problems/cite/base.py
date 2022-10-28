@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class CiteModelABC(SCMModelABC, metaclass=abc.ABCMeta):
+    public_test_index: int = 0
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 

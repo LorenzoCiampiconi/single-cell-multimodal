@@ -6,7 +6,7 @@ from torch import nn
 
 from scmm.models.embedding.autoencoder.utils import init_fc_snn
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class NNEntity(nn.Module):

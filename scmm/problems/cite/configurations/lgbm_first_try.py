@@ -1,3 +1,5 @@
+from scmm.problems.metrics import common_metrics
+
 model_label = "lgbm_w_svd_baseline"
 seed = 0
 original_dim = None
@@ -17,7 +19,7 @@ model_params = {
     "min_child_samples": 263,
 }
 
-cv_params = {"n_splits_for_kfold": 10}
+cv_params = {"cv": 3, "scoring": common_metrics, "verbose": 10}
 
 svd_params = {"output_dimensionality": 64}
 

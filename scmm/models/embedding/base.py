@@ -4,7 +4,7 @@ from typing import Type
 
 import numpy as np
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class Embedder(metaclass=abc.ABCMeta):
@@ -31,11 +31,13 @@ class Embedder(metaclass=abc.ABCMeta):
         logger.info(
             f"{self.__class__.__name__} is being fit with input_dim={self.input_dim} and latent_dim={self.output_dim}"
         )
-        self = self.fit(input=input)
-        self.fitted = True
+        self.fit(input=input)
+
         logger.info("Embedder has been fit - Done")
+        self.fitted = True
 
         logger.info("Now transforming the input")
+
         return self.transform(input=input), self
 
 
