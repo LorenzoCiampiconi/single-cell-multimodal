@@ -6,7 +6,7 @@ if __name__ == "__main__":
     setup_logging("DEBUG")
 
     model_wrapper = LGBMwMultilevelEmbedderCite(configuration=configuration, label=model_label)
-    model_wrapper.full_pipeline(save_model=True)
+    model_wrapper.full_pipeline()
 
 
 
