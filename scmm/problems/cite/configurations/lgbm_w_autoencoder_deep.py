@@ -2,7 +2,7 @@ from scmm.models.embedding.autoencoder import BasicAutoEncoderEmbedder
 from scmm.models.embedding.svd import TruncatedSVDEmbedder
 from torch import nn
 
-model_label = "lgbm_w_autoencoder"
+model_label = "lgbm_w_deep_autoencoder"
 seed = 0
 original_dim = None
 
@@ -31,7 +31,7 @@ dataloader_kwargs = {
 }
 trainer_kwargs = {
     # "accelerator": "gpu",
-    "max_epochs": 25,
+    "max_epochs": 50,
     "check_val_every_n_epoch": 1,
     # "val_check_interval": 1,
     "log_every_n_steps": 50,
@@ -39,11 +39,12 @@ trainer_kwargs = {
 }
 net_params = {
     "lr": 1e-3,
-    "shrinking_factors": (2, 2, 2, 2, 2),
+    "shrinking_factors": (2, 2, 2, 2),
     "activation_function": nn.SELU,
 }
 
-latent_dim = 64
+svd_out_dim = 2048
+latent_dim = 128
 
 embedder_params = {
     "seed": seed,
@@ -55,14 +56,14 @@ embedder_params = {
             {
                 "seed": seed,
                 "input_dim": original_dim,
-                "output_dim": 2048,
+                "output_dim": svd_out_dim,
             },
         ),
         (
             BasicAutoEncoderEmbedder,
             {
                 "seed": seed,
-                "input_dim": 2048,
+                "input_dim": svd_out_dim,
                 "output_dim": latent_dim,
                 "model_params": net_params,
                 "train_params": {
@@ -93,3 +94,5 @@ configuration = {
     "embedder_params": embedder_params,
     "seed": seed,
 }
+
+model_label = f"lgbm_w_{len(net_params['shrinking_factors'])}lrs-deep_autoencoder_dim-{svd_out_dim}->{latent_dim}"
