@@ -31,14 +31,14 @@ class Embedder(metaclass=abc.ABCMeta):
         logger.info(
             f"{self.__class__.__name__} is being fit with input_dim={self.input_dim} and latent_dim={self.output_dim}"
         )
-        fitted_obj = self.fit(input=input)
+        self.fit(input=input)
 
-        if fitted_obj is self:
-            logger.info("Embedder has been fit - Done")
-            self.fitted = True
-            
+        logger.info("Embedder has been fit - Done")
+        self.fitted = True
+
         logger.info("Now transforming the input")
-        return fitted_obj.transform(input=input), fitted_obj
+
+        return self.transform(input=input), self
 
 
 class EmbedderWrapperMixin(metaclass=abc.ABCMeta):

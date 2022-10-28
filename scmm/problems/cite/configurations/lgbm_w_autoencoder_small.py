@@ -3,7 +3,7 @@ from scmm.models.embedding.svd import TruncatedSVDEmbedder
 from scmm.problems.metrics import common_metrics
 from torch import nn
 
-model_label = "lgbm_w_autoencoder"
+model_label = "lgbm_w_autoencoder_small"
 seed = 0
 original_dim = None
 
