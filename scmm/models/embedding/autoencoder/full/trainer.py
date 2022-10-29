@@ -1,6 +1,6 @@
 import abc
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Type
 
 import numpy as np
 import torch
@@ -33,6 +33,11 @@ class AutoEncoderTrainer(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def build_model(self):
+        ...
+
+    @property
+    @abc.abstractmethod
+    def autoencoder_class(self) -> Type[pl.LightningModule]:
         ...
 
     @property
@@ -110,3 +115,9 @@ class AutoEncoderTrainer(metaclass=abc.ABCMeta):
             out = as_numpy(torch.cat([encoder(x) for x in dsl])).reshape(-1, self.latent_dim)
         logger.info("Autoencoder has transformed the input")
         return out
+
+    def save_model(self, path, **kwargs):
+        self.trainer.save_checkpoint(path, **kwargs)
+
+    def load_model(self, path, **kwargs):
+        return self.autoencoder_class.load_from_checkpoint(path, **kwargs)
