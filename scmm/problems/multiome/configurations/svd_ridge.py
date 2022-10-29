@@ -1,6 +1,8 @@
 from scmm.problems.metrics import common_metrics
+from scmm.problems.multiome.concrete import RidgeSVDMulti
 
 model_label = "ridge_w_svd_baseline"
+model_class = RidgeSVDMulti
 seed = 0
 original_dim = None
 

@@ -35,13 +35,16 @@ class Embedder(metaclass=abc.ABCMeta):
         logger.info("Embedder has been fit - Done")
         self.fitted = True
 
+        if "use_cache" not in kwargs:
+            kwargs["use_cache"] = False
+
         return self.transform(input=input, **kwargs), self
 
     def inverse_transform(self, input):
         raise NotImplementedError(f'{self.__class__} does not implement any inverse function for the mapping to a space with a smaller dimensionality')
 
 
-class EmbedderWrapperMixin(metaclass=abc.ABCMeta):
+class EmbedderWrapperInputMixin(metaclass=abc.ABCMeta):
     configuration: dict
 
     @property
@@ -59,4 +62,27 @@ class EmbedderWrapperMixin(metaclass=abc.ABCMeta):
         return out
 
     def apply_dimensionality_reduction(self, input, **kwargs):
+        return self.embedder.transform(input=input, **kwargs)
+
+class EmbedderWrapperOutputMixin(metaclass=abc.ABCMeta):
+    configuration: dict
+
+    @property
+    @abc.abstractmethod
+    def embedder_output_class(self) -> Type[Embedder]:
+        pass
+
+    @property
+    def embedder_output_kwargs(self) -> dict:
+        return self.configuration["embedder_output_params"]
+
+    def fit_and_apply_dimensionality_reduction_to_target(self, *, input, **kwargs):
+        self.embedder = self.embedder_output_class(**self.embedder_output_kwargs)
+        out, self.embedder = self.embedder.fit_transform(input=input, **kwargs)
+        return out
+
+    def apply_dimensionality_reduction_to_target(self, input, **kwargs):
+        return self.embedder.transform(input=input, **kwargs)
+
+    def apply_dimensionality_expansion_to_prediction(self, input, **kwargs):
         return self.embedder.transform(input=input, **kwargs)

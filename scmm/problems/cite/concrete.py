@@ -1,12 +1,12 @@
-from scmm.models.multi_model import MultiOutputRegressorMixin
+from scmm.models.multioutput import MultiOutputRegressorMixin
 from scmm.problems.cite.base import CiteModelABC
 from scmm.models.lgbm import LGBMMixin
-from scmm.models.embedding.concrete import MultiLevelEmbedderMixin, TruncateSVDEmbedderMixin
+from scmm.models.embedding.concrete import MultiLevelEmbedderInputMixin, TruncateSVDEmbedderInputMixin
 
 
-class LGBMwSVDCite(LGBMMixin, TruncateSVDEmbedderMixin, MultiOutputRegressorMixin, CiteModelABC):
+class LGBMwSVDCite(MultiOutputRegressorMixin, LGBMMixin, TruncateSVDEmbedderInputMixin, CiteModelABC):
     ...
 
 
-class LGBMwMultilevelEmbedderCite(LGBMMixin, MultiLevelEmbedderMixin, MultiOutputRegressorMixin, CiteModelABC):
+class LGBMwMultilevelEmbedderCite(MultiOutputRegressorMixin, LGBMMixin, MultiLevelEmbedderInputMixin, CiteModelABC):
     ...

@@ -106,7 +106,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         X, Y = self.train_input, self.train_target
 
         logger.debug(f"{self.model_label} - applying dimensionality reduction")
-        X = self.fit_and_apply_dimensionality_reduction(input=X, runtime_labelling=self.problem_label)
+        X = self.fit_and_apply_dimensionality_reduction(input=X, runtime_labelling=self.problem_label, use_cache=True)
         logger.debug(f"{self.model_label} - applying dimensionality reduction - Done")
 
         logger.info(f"{self.model_label} - performing cross validation")
@@ -121,7 +121,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         return cv_out
 
     def predict_public_test(self) -> np.array:
-        X_test_reduced = self.apply_dimensionality_reduction(input=self.test_input, runtime_labelling=f"{self.problem_label}_public_test")
+        X_test_reduced = self.apply_dimensionality_reduction(input=self.test_input, runtime_labelling=f"{self.problem_label}_public_test", use_cache=True)
         return self._trained_model.predict(X_test_reduced)
 
     def generate_public_test_output(self, test_output: np.array):

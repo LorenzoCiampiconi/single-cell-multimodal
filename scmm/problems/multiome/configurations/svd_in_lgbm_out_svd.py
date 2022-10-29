@@ -1,11 +1,12 @@
 from scmm.problems.metrics import common_metrics
+from scmm.problems.multiome.concrete import SVDinLGBMoutSVDMultiome
 
-model_label = "lgbm_w_svd_baseline"
-model_class = ...
-
+model_label = "svd_in_lgbm_out_svd"
+model_class = SVDinLGBMoutSVDMultiome
 seed = 0
 original_dim = None
 
+cv_params = {"cv": 3, "scoring": common_metrics, "verbose": 10}
 
 model_params = {
     "learning_rate": 0.1,
@@ -21,9 +22,15 @@ model_params = {
     "min_child_samples": 263,
 }
 
-cv_params = {"cv": 3, "scoring": common_metrics, "verbose": 10}
+output_embedder_params = {
+    "seed": seed,
+    "input_dim": original_dim,
+    "output_dim": 256,
+}
 
-svd_params = {"output_dimensionality": 64}
+odr_params = {
+    "embedder_params": output_embedder_params
+}
 
 embedder_params = {
     "seed": seed,
@@ -35,5 +42,6 @@ configuration = {
     "cv_params": cv_params,
     "model_params": model_params,
     "embedder_params": embedder_params,
+    "odr_params": odr_params,
     "seed": seed,
 }
