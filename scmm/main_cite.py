@@ -18,20 +18,20 @@ import argparse
 import logging
 from scmm.utils.log import setup_logging
 from scmm.problems.cite.concrete import LGBMwMultilevelEmbedderCite
-from scmm.problems.cite.configurations.config_dict import config_dic
+from scmm.problems.cite.configurations.config_dict import config_dict
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # logging setup
     setup_logging("DEBUG")
     logger = logging.getLogger(__name__)
 
     # argparse setup
-    parser = argparse.ArgumentParser(description='scmm full pipline')
+    parser = argparse.ArgumentParser(description='scmm full pipline for cite problem, specifying a configuration')
     parser.add_argument("config_name", type=str, help='configuration name or configuration file name')
     args = parser.parse_args()
 
-    if args.config_name in config_dic:
-        config_file = config_dic.get(args.config_name)
+    if args.config_name in config_dict:
+        config_file = config_dict.get(args.config_name)
     else:
         config_file = args.config_name
 

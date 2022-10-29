@@ -12,12 +12,13 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
 
 from scmm.models.embedding.autoencoder.full.dataset import BaseDataset, as_numpy
+from scmm.models.embedding.base import Embedder
 from scmm.utils.log import settings
 
 logger = logging.getLogger(__name__)
 
 
-class AutoEncoderTrainer(metaclass=abc.ABCMeta):
+class AutoEncoderTrainer(Embedder, metaclass=abc.ABCMeta):
     def __init__(
         self, *, seed: int, input_dim: int, output_dim: int, model_params: Dict[str, Any], train_params: Dict[str, Any]
     ):
@@ -101,7 +102,16 @@ class AutoEncoderTrainer(metaclass=abc.ABCMeta):
         )
         return dsl
 
-    def fit(self, *, input: ArrayLike):
+    # @caching_method(
+    #     file_label="embedder",
+    #     file_extension="t-svd",
+    #     loading_method_ref='_load_cached_svd',
+    #     saving_function=joblib.dump,
+    #     labelling_kwargs={},
+    #     object_labelling_attributes=("input_dim", "output_dim", "seed"),
+    #     cache_folder="autoencoder",
+    # )
+    def fit(self, *, input: ArrayLike, **kwargs):
         dsl = self.build_data_loader(input, shuffle=True)
         self.trainer.fit(self.model, train_dataloaders=dsl)
         self.fitted = True

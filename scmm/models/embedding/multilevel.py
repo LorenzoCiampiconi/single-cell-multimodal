@@ -31,11 +31,13 @@ class MultiLevelEmbedder(Embedder):
 
         return input
 
-    def fit(self, *, input):
+    def fit(self, *, input, **kwargs):
         self._fitted_embedder = []
-        for embedder, kwargs in self.embedders_config:
-            input, embedder = embedder(**kwargs).fit_transform(input=input)
+        for embedder, init_kwargs in self.embedders_config:
+            input, embedder = embedder(**init_kwargs).fit_transform(input=input, **kwargs)
             self._fitted_embedder.append(embedder)
+            # runtime_labelling = kwargs['runtime_labelling']
+            # runtime_labelling += "" #todo
 
         self.fitted = True
 

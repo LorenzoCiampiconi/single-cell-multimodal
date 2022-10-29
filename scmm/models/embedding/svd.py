@@ -37,7 +37,7 @@ class TruncatedSVDEmbedder(Embedder):
         object_labelling_attributes=("input_dim", "output_dim", "seed"),
         cache_folder="svd",
     )  # todo improve when will cache also multiome dimensionality reduction
-    def fit(self, *, input):
+    def fit(self, *, input, **kwargs):
         self.svd.fit(input)
         self.fitted = True
         return self
