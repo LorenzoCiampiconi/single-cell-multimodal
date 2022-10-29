@@ -22,12 +22,12 @@ class MultiLevelEmbedder(Embedder):
         self._fitted_embedder = []
         self.fitted = False
 
-    def transform(self, *, input) -> np.array:
+    def transform(self, *, input, **kwargs) -> np.array:
         assert self.fitted and all(
             e.is_fit for e in self._fitted_embedder
         ), "this multi level embedder has not been fitted"
         for embedder in self._fitted_embedder:
-            input = embedder.transform(input=input)
+            input = embedder.transform(input=input, **kwargs)
 
         return input
 

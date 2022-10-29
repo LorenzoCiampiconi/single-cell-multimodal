@@ -84,7 +84,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     def fit_and_apply_dimensionality_reduction(self, input, **kwargs):
         return input
 
-    def apply_dimensionality_reduction(self, input):
+    def apply_dimensionality_reduction(self, input, **kwargs):
         return input
 
     def cross_validation(self, X, Y, **kwargs):
@@ -119,7 +119,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         return cv_out
 
     def predict_public_test(self) -> np.array:
-        X_test_reduced = self.apply_dimensionality_reduction(input=self.test_input)
+        X_test_reduced = self.apply_dimensionality_reduction(input=self.test_input, runtime_labelling=f"{self.problem_label}_public_test")
         return self._trained_model.predict(X_test_reduced)
 
     def generate_public_test_output(self, test_output: np.array):

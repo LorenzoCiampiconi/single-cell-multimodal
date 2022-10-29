@@ -117,7 +117,7 @@ class AutoEncoderTrainer(Embedder, metaclass=abc.ABCMeta):
         self.fitted = True
         return self
 
-    def transform(self, *, input: ArrayLike) -> np.array:
+    def transform(self, *, input: ArrayLike, **kwargs) -> np.array:
         dsl = self.build_data_loader(input)
         encoder = self.model.encoder.eval()
 
