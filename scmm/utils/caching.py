@@ -75,8 +75,12 @@ def caching_method(
         assert (saving_function is not None) != (saving_method_ref is not None)
 
         @wraps(fun)
-        def decorated_method(*args, use_cache=True, **kwargs):
+        def decorated_method(*args, runtime_labelling="", use_cache=True, **kwargs):
             file_name = f"{file_label}"
+
+            if runtime_labelling:
+                file_name += f"_{runtime_labelling}"
+
             for kwarg in labelling_kwargs:
                 assert kwarg in labelling_kwargs, f"{kwarg} is not passed, or not passed as a keyword argument, please check the code."
                 file_name += f"_{kwargs}-{kwargs[kwarg]}"
