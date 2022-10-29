@@ -17,6 +17,10 @@ logger = logging.getLogger(__name__)
 
 class BasicAutoEncoderEmbedder(AutoEncoderTrainer):
 
+    @property
+    def autoencoder_class(self) -> Type[pl.LightningModule]:
+        return AutoEncoder
+
     # def __reduce__(self): todo
     #     return (BasicAutoEncoderEmbedder, (self.to_dict(), self.__merge__, self.__iterable_as_set__, self.__label__))
 
