@@ -1,14 +1,13 @@
 import abc
 import logging
 from datetime import datetime
-from typing import Any, Dict, Type
+from typing import Any, Dict
 
 import numpy as np
 import pandas as pd
 from scipy import sparse
 from scmm.utils.appdirs import app_static_dir
 from scmm.utils.scikit_crossval import cross_validate
-from sklearn.multioutput import MultiOutputRegressor
 
 logger = logging.getLogger(__name__)
 
@@ -133,26 +132,3 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         submission.to_csv(
             app_static_dir("out") / f"{self.model_label}_{datetime.now().strftime('%Y%m%d-%H%M')}_submission.csv"
         )
-
-
-class MultiModelWrapperMixin(metaclass=abc.ABCMeta):
-    model_params: Dict
-    model_class: Type
-
-    @property
-    @abc.abstractmethod
-    def model_wrapper_class(self):
-        pass
-
-    def instantiate_model(self, **model_instantiation_kwargs):
-        return self.model_wrapper_class(**model_instantiation_kwargs)
-
-    @property
-    def model_instantiation_kwargs(self):
-        return {"estimator": self.model_class(**self.model_params)}
-
-
-class MultiOutputRegressorMixin(MultiModelWrapperMixin):
-    @property
-    def model_wrapper_class(self):
-        return MultiOutputRegressor
