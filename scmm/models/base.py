@@ -87,9 +87,11 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     def apply_dimensionality_reduction(self, input, **kwargs):
         return input
 
-    def cross_validation(self, X, Y, **kwargs):
+    def cross_validation(self, X, Y, custom_params=None, **kwargs):
         # TODO with strategy: {self.cv_params['strategy']}")
-        instantiate_model = lambda: self.instantiate_model(**self.model_instantiation_kwargs)
+
+        model_params = custom_params if custom_params is not None else self.model_instantiation_kwargs
+        instantiate_model = lambda: self.instantiate_model(**model_params)
         cv_raw = cross_validate(instantiate_model, X, Y, **self.cv_params)
         cv_out = self.process_cv_out(cv_raw)
         return cv_out

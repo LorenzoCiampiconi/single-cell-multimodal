@@ -19,7 +19,7 @@ class MultiLevelEmbedder(Embedder):
     ):
         super().__init__(seed=seed, input_dim=input_dim, output_dim=output_dim)
         self.embedders_config = embedders_config
-        self._fitted_embedder = []
+        self._fitted_embedder: List[Embedder] = []
         self.fitted = False
 
     def transform(self, *, input, **kwargs) -> np.array:
@@ -42,3 +42,12 @@ class MultiLevelEmbedder(Embedder):
         self.fitted = True
 
         return self
+
+    def inverse_transform(self, input):
+        assert self.fitted and all(
+            e.is_fit for e in self._fitted_embedder
+        ), "this multi level embedder has not been fitted"
+        for embedder in reversed(self._fitted_embedder):
+            input = embedder.inverse_transform(input=input)
+
+        return input

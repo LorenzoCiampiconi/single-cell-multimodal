@@ -54,3 +54,6 @@ class TruncatedSVDEmbedder(Embedder):
     def transform(self, *, input, **kwargs) -> np.array:
         logger.info("t-svd is now transforming the input")
         return self.svd.transform(input)
+
+    def inverse_transform(self, input):
+        return self.svd.inverse_transform(input)

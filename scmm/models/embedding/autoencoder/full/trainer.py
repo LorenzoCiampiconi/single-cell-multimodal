@@ -126,6 +126,15 @@ class AutoEncoderTrainer(Embedder, metaclass=abc.ABCMeta):
         logger.info("Autoencoder has transformed the input")
         return out
 
+    def inverse_transform(self, *, input: ArrayLike, **kwargs) -> np.array:
+        dsl = self.build_data_loader(input)
+        decoder = self.model.decoder.eval()
+
+        with torch.no_grad():
+            out = as_numpy(torch.cat([decoder(x) for x in dsl])).reshape(-1, self.input_dim)
+        logger.info("Autoencoder has inverse transformed the input")
+        return out
+
     def save_model(self, path, **kwargs):
         self.trainer.save_checkpoint(path, **kwargs)
 
