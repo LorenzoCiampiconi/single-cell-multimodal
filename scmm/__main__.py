@@ -1,5 +1,5 @@
 from scmm.problems.cite.concrete import LGBMwMultilevelEmbedderCite
-from scmm.problems.cite.configurations.lgbm_w_autoencoder_deep import configuration, model_label
+from scmm.problems.cite.configurations.lgbm_w_autoencoder_small import configuration, model_label
 from scmm.utils.log import setup_logging
 
 if __name__ == "__main__":
