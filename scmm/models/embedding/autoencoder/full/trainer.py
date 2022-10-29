@@ -1,6 +1,6 @@
 import abc
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Type
 
 import numpy as np
 import torch
@@ -12,12 +12,13 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
 
 from scmm.models.embedding.autoencoder.full.dataset import BaseDataset, as_numpy
+from scmm.models.embedding.base import Embedder
 from scmm.utils.log import settings
 
 logger = logging.getLogger(__name__)
 
 
-class AutoEncoderTrainer(metaclass=abc.ABCMeta):
+class AutoEncoderTrainer(Embedder, metaclass=abc.ABCMeta):
     def __init__(
         self, *, seed: int, input_dim: int, output_dim: int, model_params: Dict[str, Any], train_params: Dict[str, Any]
     ):
@@ -33,6 +34,11 @@ class AutoEncoderTrainer(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def build_model(self):
+        ...
+
+    @property
+    @abc.abstractmethod
+    def autoencoder_class(self) -> Type[pl.LightningModule]:
         ...
 
     @property
@@ -96,13 +102,22 @@ class AutoEncoderTrainer(metaclass=abc.ABCMeta):
         )
         return dsl
 
-    def fit(self, *, input: ArrayLike):
+    # @caching_method(
+    #     file_label="embedder",
+    #     file_extension="t-svd",
+    #     loading_method_ref='_load_cached_svd',
+    #     saving_function=joblib.dump,
+    #     labelling_kwargs={},
+    #     object_labelling_attributes=("input_dim", "output_dim", "seed"),
+    #     cache_folder="autoencoder",
+    # )
+    def fit(self, *, input: ArrayLike, **kwargs):
         dsl = self.build_data_loader(input, shuffle=True)
         self.trainer.fit(self.model, train_dataloaders=dsl)
         self.fitted = True
         return self
 
-    def transform(self, *, input: ArrayLike) -> np.array:
+    def transform(self, *, input: ArrayLike, **kwargs) -> np.array:
         dsl = self.build_data_loader(input)
         encoder = self.model.encoder.eval()
 
@@ -110,3 +125,9 @@ class AutoEncoderTrainer(metaclass=abc.ABCMeta):
             out = as_numpy(torch.cat([encoder(x) for x in dsl])).reshape(-1, self.latent_dim)
         logger.info("Autoencoder has transformed the input")
         return out
+
+    def save_model(self, path, **kwargs):
+        self.trainer.save_checkpoint(path, **kwargs)
+
+    def load_model(self, path, **kwargs):
+        return self.autoencoder_class.load_from_checkpoint(path, **kwargs)

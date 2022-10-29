@@ -7,7 +7,7 @@ from sklearn.decomposition import TruncatedSVD
 
 from scmm.models.embedding.base import Embedder
 
-from scmm.utils.caching import caching_method
+from scmm.utils.caching import caching_method, np_load_wrapper, np_save_wrapper
 
 logger = logging.getLogger(__name__)
 
@@ -36,11 +36,21 @@ class TruncatedSVDEmbedder(Embedder):
         labelling_kwargs={},
         object_labelling_attributes=("input_dim", "output_dim", "seed"),
         cache_folder="svd",
-    )  # todo improve when will cache also multiome dimensionality reduction
-    def fit(self, *, input):
+    )
+    def fit(self, *, input, **kwargs):
         self.svd.fit(input)
         self.fitted = True
         return self
 
-    def transform(self, *, input) -> np.array:
+    @caching_method(
+        file_label="embedded",
+        file_extension="npz",
+        loading_function=np_load_wrapper,
+        saving_function=np_save_wrapper,
+        labelling_kwargs={},
+        object_labelling_attributes=("input_dim", "output_dim", "seed"),
+        cache_folder="svd/output",
+    )
+    def transform(self, *, input, **kwargs) -> np.array:
+        logger.info("t-svd is now transforming the input")
         return self.svd.transform(input)

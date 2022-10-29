@@ -12,8 +12,13 @@ logger = logging.getLogger(__name__)
 
 def np_load_wrapper(svd_caching_path):
     with np.load(svd_caching_path) as npz_file:
-        train_mat, test_mat = npz_file["train_mat"], npz_file["test_mat"]
-        return train_mat, test_mat
+        cached_output = npz_file["cached_output"]
+        return cached_output
+
+
+def np_save_wrapper(cached_output, svd_caching_path):
+    np.savez_compressed(svd_caching_path, cached_output=cached_output)
+
 
 
 def caching_function(
@@ -75,8 +80,12 @@ def caching_method(
         assert (saving_function is not None) != (saving_method_ref is not None)
 
         @wraps(fun)
-        def decorated_method(*args, use_cache=True, **kwargs):
+        def decorated_method(*args, runtime_labelling="", use_cache=True, **kwargs):
             file_name = f"{file_label}"
+
+            if runtime_labelling:
+                file_name += f"_{runtime_labelling}"
+
             for kwarg in labelling_kwargs:
                 assert kwarg in labelling_kwargs, f"{kwarg} is not passed, or not passed as a keyword argument, please check the code."
                 file_name += f"_{kwargs}-{kwargs[kwarg]}"
@@ -110,7 +119,7 @@ def caching_method(
                 return loader(caching_file)
             else:
                 returning_value = fun(*args, **kwargs)
-                logger.info(f"caching {returning_value} into {caching_file}")
+                logger.info(f"caching {returning_value} from {fun} into {caching_file}")
                 saver(returning_value, caching_file)
                 return returning_value
 

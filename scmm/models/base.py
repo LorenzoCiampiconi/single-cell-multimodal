@@ -8,7 +8,6 @@ import pandas as pd
 from scipy import sparse
 from scmm.utils.appdirs import app_static_dir
 from scmm.utils.scikit_crossval import cross_validate
-from sklearn.multioutput import MultiOutputRegressor
 
 logger = logging.getLogger(__name__)
 
@@ -54,14 +53,17 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     def test_input(self) -> sparse.csr_array:
         pass
 
-    @abc.abstractmethod
     def instantiate_model(self, **model_instantiation_kwargs):
-        pass
+        return self.model_class(**model_instantiation_kwargs)
 
     @property
     @abc.abstractmethod
-    def model_instantiation_kwargs(self):
+    def model_class(self):
         pass
+
+    @property
+    def model_instantiation_kwargs(self):
+        return self.model_params
 
     @property
     def cv_params(self):
@@ -79,10 +81,10 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     def embedder_params(self):
         return self.configuration["embedder_params"]
 
-    def fit_and_apply_dimensionality_reduction(self, input):
+    def fit_and_apply_dimensionality_reduction(self, input, **kwargs):
         return input
 
-    def apply_dimensionality_reduction(self, input):
+    def apply_dimensionality_reduction(self, input, **kwargs):
         return input
 
     def cross_validation(self, X, Y, **kwargs):
@@ -98,18 +100,18 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     def fit_model(self, X, Y):
         self._trained_model = self.instantiate_model(**self.model_instantiation_kwargs).fit(X, Y)
 
-    def full_pipeline(self, refit=True):
+    def full_pipeline(self, refit=True, perform_cross_validation=True):
         X, Y = self.train_input, self.train_target
 
         logger.debug(f"{self.model_label} - applying dimensionality reduction")
-        X = self.fit_and_apply_dimensionality_reduction(input=X)
+        X = self.fit_and_apply_dimensionality_reduction(input=X, runtime_labelling=self.problem_label)
         logger.debug(f"{self.model_label} - applying dimensionality reduction - Done")
 
         logger.info(f"{self.model_label} - performing cross validation")
         cv_out = self.cross_validation(X, Y)
         logger.info(f"{self.model_label} - Average  metrics: " + " | ".join([f"({k})={v:.4}" for k, v in cv_out.mean().items()]))
 
-        if refit:
+        if refit or not perform_cross_validation:
             self.fit_model(X, Y)
             Y_test = self.predict_public_test()
             self.generate_public_test_output(Y_test)
@@ -117,11 +119,11 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         return cv_out
 
     def predict_public_test(self) -> np.array:
-        X_test_reduced = self.apply_dimensionality_reduction(input=self.test_input)
+        X_test_reduced = self.apply_dimensionality_reduction(input=self.test_input, runtime_labelling=f"{self.problem_label}_public_test")
         return self._trained_model.predict(X_test_reduced)
 
     def generate_public_test_output(self, test_output: np.array):
-        test_output[:7476] = 0
+        # test_output[:self.invalid_test_index] = 0
         submission = pd.read_csv(app_static_dir("data") / "sample_submission.csv", index_col="row_id").squeeze(
             "columns"
         )
@@ -130,30 +132,3 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         submission.to_csv(
             app_static_dir("out") / f"{self.model_label}_{datetime.now().strftime('%Y%m%d-%H%M')}_submission.csv"
         )
-
-
-class MultiModelWrapperMixin(metaclass=abc.ABCMeta):
-    model_params: Dict
-
-    @property
-    @abc.abstractmethod
-    def model_wrapper_class(self):
-        pass
-
-    @property
-    @abc.abstractmethod
-    def model_class(self):
-        pass
-
-    def instantiate_model(self, **model_instantiation_kwargs):
-        return self.model_wrapper_class(**model_instantiation_kwargs)
-
-    @property
-    def model_instantiation_kwargs(self):
-        return {"estimator": self.model_class(**self.model_params)}
-
-
-class MultiOutputRegressorMixin(MultiModelWrapperMixin):
-    @property
-    def model_wrapper_class(self):
-        return MultiOutputRegressor

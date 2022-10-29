@@ -63,7 +63,7 @@ def cross_validate(
         results.append(res)
         gc.collect()
 
-    # For callabe scoring, the return type is only know after calling. If the
+    # For callable scoring, the return type is only know after calling. If the
     # return type is a dictionary, the error scores can now be inserted with
     # the correct key.
     if callable(scoring):

@@ -20,25 +20,22 @@ class Embedder(metaclass=abc.ABCMeta):
         return self.fitted
 
     @abc.abstractmethod
-    def fit(self, *, input):
+    def fit(self, *, input, **kwargs):
         pass
 
     @abc.abstractmethod
-    def transform(self, *, input) -> np.array:
+    def transform(self, *, input, **kwargs) -> np.array:
         pass
 
-    def fit_transform(self, *, input) -> np.array:
+    def fit_transform(self, *, input, **kwargs) -> np.array:
         logger.info(
             f"{self.__class__.__name__} is being fit with input_dim={self.input_dim} and latent_dim={self.output_dim}"
         )
-        self.fit(input=input)
-
+        self.fit(input=input, **kwargs)
         logger.info("Embedder has been fit - Done")
         self.fitted = True
 
-        logger.info("Now transforming the input")
-
-        return self.transform(input=input), self
+        return self.transform(input=input, **kwargs), self
 
 
 class EmbedderWrapperMixin(metaclass=abc.ABCMeta):
@@ -53,10 +50,10 @@ class EmbedderWrapperMixin(metaclass=abc.ABCMeta):
     def embedder_kwargs(self) -> dict:
         return self.configuration["embedder_params"]
 
-    def fit_and_apply_dimensionality_reduction(self, *, input):
+    def fit_and_apply_dimensionality_reduction(self, *, input, **kwargs):
         self.embedder = self.embedder_class(**self.embedder_kwargs)
-        out, self.embedder = self.embedder.fit_transform(input=input)
+        out, self.embedder = self.embedder.fit_transform(input=input, **kwargs)
         return out
 
-    def apply_dimensionality_reduction(self, input):
-        return self.embedder.transform(input=input)
+    def apply_dimensionality_reduction(self, input, **kwargs):
+        return self.embedder.transform(input=input, **kwargs)

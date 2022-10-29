@@ -1,4 +1,5 @@
 import logging
+from typing import Type
 
 import torch
 import pytorch_lightning as pl
@@ -7,7 +8,6 @@ from torch import nn
 from scmm.models.embedding.autoencoder.full.base import AutoEncoder
 
 from scmm.models.embedding.autoencoder.full.dataset import as_numpy
-from scmm.models.embedding.autoencoder.decoder.base import FullyConnectedDecoder
 from scmm.models.embedding.autoencoder.encoder.base import FullyConnectedEncoder
 from scmm.models.embedding.autoencoder.full.trainer import AutoEncoderTrainer
 from scmm.models.embedding.base import Embedder
@@ -15,7 +15,15 @@ from scmm.models.embedding.base import Embedder
 logger = logging.getLogger(__name__)
 
 
-class BasicAutoEncoderEmbedder(AutoEncoderTrainer, Embedder):
+class BasicAutoEncoderEmbedder(AutoEncoderTrainer):
+
+    @property
+    def autoencoder_class(self) -> Type[pl.LightningModule]:
+        return AutoEncoder
+
+    # def __reduce__(self): todo
+    #     return (BasicAutoEncoderEmbedder, (self.to_dict(), self.__merge__, self.__iterable_as_set__, self.__label__))
+
     def build_model(self):
         pl.seed_everything(self.seed, workers=True)
 
@@ -54,7 +62,7 @@ class BasicAutoEncoderEmbedder(AutoEncoderTrainer, Embedder):
                 fully_connected_sequential=encoder_sequential,
             )
 
-        return AutoEncoder(lr=lr, encoder=encoder, decoder=decoder)
+        return self.autoencoder_class(lr=lr, encoder=encoder, decoder=decoder)
 
     def _predict(self, ds):
         out = self.trainer.predict(self.model, ds)
