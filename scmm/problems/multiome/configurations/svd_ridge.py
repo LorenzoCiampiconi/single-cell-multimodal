@@ -6,7 +6,8 @@ original_dim = None
 
 
 model_params = {
-    "copy_X": False
+    "copy_X": False,
+    "alpha": 5,
 }
 
 cv_params = {"cv": 3, "scoring": common_metrics, "verbose": 10}

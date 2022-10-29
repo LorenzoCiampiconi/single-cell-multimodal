@@ -38,5 +38,12 @@ if __name__ == '__main__':
     config_module = importlib.import_module("scmm.problems.multiome.configurations."+config_file)
     logger.info("starting full pipeline with configuration: " f"{config_module.model_label}")
 
-    model_wrapper = RidgeSVDMulti(configuration=config_module.configuration, label=config_module.model_label)
-    model_wrapper.full_pipeline()
+
+    alpha_s = [1, 2, 4, 8, 16, 32, 64, 128]
+
+    configuration = config_module.configuration
+
+    for alpha in alpha_s:
+        configuration['model_params']['alpha'] = alpha
+        model_wrapper = RidgeSVDMulti(configuration=configuration, label=config_module.model_label)
+        model_wrapper.full_pipeline(refit=False)
