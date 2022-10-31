@@ -1,1 +1,1 @@
-from .full.concrete import BasicAutoEncoderEmbedder
+from .full.concrete.fully_connected import BasicAutoEncoderEmbedder

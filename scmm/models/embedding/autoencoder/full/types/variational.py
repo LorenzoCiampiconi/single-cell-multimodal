@@ -3,10 +3,10 @@ from typing import Any
 import torch
 from torch import nn, distributions as td
 
-from scmm.models.embedding.autoencoder.base import AutoEncoder
+from scmm.models.embedding.autoencoder.full.types.basic import BasicAutoEncoder
 
 
-class VariationalAutoEncoder(AutoEncoder):
+class VariationalAutoEncoder(BasicAutoEncoder):
     def __init__(self, *, lr: float, kl_coef: float, encoder: nn.Module, decoder: nn.Module):
         super().__init__(lr=lr, encoder=encoder, decoder=decoder)
         self.kl_coef = kl_coef

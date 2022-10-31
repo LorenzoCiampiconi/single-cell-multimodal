@@ -14,7 +14,7 @@ from sklearn.decomposition import TruncatedSVD
 from torch import nn
 from torch.utils.data import DataLoader
 from scmm.utils.data_handling import load_sparse
-from scmm.models.embedding.autoencoder.full.base import AutoEncoder
+from scmm.models.embedding.autoencoder.full.types import AutoEncoder
 
 from scmm.models.embedding.autoencoder.full.dataset import BaseDataset, as_numpy
 from scmm.models.embedding.autoencoder.decoder.base import FullyConnectedDecoder

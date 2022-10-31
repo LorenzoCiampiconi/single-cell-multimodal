@@ -10,18 +10,15 @@ from scmm.models.embedding.autoencoder.full.types.basic import BasicAutoEncoder
 from scmm.models.embedding.autoencoder.full.dataset import as_numpy
 from scmm.models.embedding.autoencoder.encoder.base import FullyConnectedEncoder
 from scmm.models.embedding.autoencoder.full.trainer import AutoEncoderTrainer
+from scmm.models.embedding.base import Embedder
 
 logger = logging.getLogger(__name__)
 
 
-class BasicAutoEncoderEmbedder(AutoEncoderTrainer):
-
+class BasicAutoEncoderEmbedder(AutoEncoderTrainer, Embedder):
     @property
     def autoencoder_class(self) -> Type[pl.LightningModule]:
         return BasicAutoEncoder
-
-    # def __reduce__(self): todo
-    #     return (BasicAutoEncoderEmbedder, (self.to_dict(), self.__merge__, self.__iterable_as_set__, self.__label__))
 
     def build_model(self):
         pl.seed_everything(self.seed, workers=True)

@@ -9,7 +9,7 @@ from torch.optim import lr_scheduler
 from scmm.models.embedding.autoencoder.encoder.base import EncoderABC
 
 
-class AutoEncoder(pl.LightningModule):
+class BasicAutoEncoder(pl.LightningModule):
     def __init__(self, *, lr: float, encoder: EncoderABC, decoder: Optional[nn.Module] = None):
         super().__init__()
         self.encoder = encoder
