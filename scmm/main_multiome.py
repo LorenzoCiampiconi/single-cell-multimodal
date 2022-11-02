@@ -13,12 +13,12 @@ todo: temporary main to be refactored
     4) run the pipline with the proper config or rise an error
 '''
 
-import importlib
 import argparse
+import importlib
 import logging
-from scmm.utils.log import setup_logging
-from scmm.problems.multiome.concrete import RidgeSVDMulti, SVDinLGBMoutSVDMultiome
+
 from scmm.problems.multiome.configurations.config_dict import config_dict
+from scmm.utils.log import setup_logging
 
 if __name__ == '__main__':
     # logging setup

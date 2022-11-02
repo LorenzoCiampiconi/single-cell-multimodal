@@ -13,12 +13,12 @@ todo: temporary main to be refactored
     4) run the pipline with the proper config or rise an error
 '''
 
-import importlib
 import argparse
+import importlib
 import logging
-from scmm.utils.log import setup_logging
-from scmm.problems.cite.concrete import LGBMwMultilevelEmbedderCite
+
 from scmm.problems.cite.configurations.config_dict import config_dict
+from scmm.utils.log import setup_logging
 
 if __name__ == '__main__':
     # logging setup
@@ -38,7 +38,10 @@ if __name__ == '__main__':
     config_module = importlib.import_module("scmm.problems.cite.configurations."+config_file)
     logger.info("starting full pipeline with configuration: " f"{config_module.model_label}")
 
-    model_wrapper = LGBMwMultilevelEmbedderCite(configuration=config_module.configuration, label=config_module.model_label)
+    configuration = config_module.configuration
+    model_class = config_module.model_class
+
+    model_wrapper = model_class(configuration=configuration, label=config_module.model_label)
     model_wrapper.full_pipeline()
 
 

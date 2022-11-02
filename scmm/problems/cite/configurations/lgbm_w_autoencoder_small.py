@@ -1,9 +1,11 @@
 from scmm.models.embedding.autoencoder import BasicAutoEncoderEmbedder
 from scmm.models.embedding.svd import TruncatedSVDEmbedder
+from scmm.problems.cite.concrete import LGBMwMultilevelEmbedderCite
 from scmm.problems.metrics import common_metrics
 from torch import nn
 
 model_label = "lgbm_w_autoencoder_small"
+model_class = LGBMwMultilevelEmbedderCite
 seed = 0
 original_dim = None
 
