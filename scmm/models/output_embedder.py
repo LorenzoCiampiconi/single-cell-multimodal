@@ -23,9 +23,8 @@ class OutputDimensionalityReducedModelWrapper(FittablePredictingEstimator):
         self._wrapped_model = wrapped_model
         self._dimensionality_reducer: Embedder = embedder_class(**embedder_params)
 
-
     def fit(self, X, Y, **kwargs) -> FittablePredictingEstimator:
-        Y_r = self._dimensionality_reducer.fit_transform(input=Y, runtime_labelling=f"odr", **kwargs)
+        Y_r, self._dimensionality_reducer = self._dimensionality_reducer.fit_transform(input=Y, runtime_labelling=f"odr", **kwargs)
         self._wrapped_model.fit(X, Y_r)
         self._is_fitted = True
         return self
@@ -41,17 +40,18 @@ class OutputDimensionalityReducedModelWrapper(FittablePredictingEstimator):
 
 
 class ODRModelWrappedMixin(metaclass=abc.ABCMeta):
-    '''
-        ODR stands for Output Dimensionality Reduced
-    '''
+    """
+    ODR stands for Output Dimensionality Reduced
+    """
+
     model_class: Type
     model_params: dict
     odr_embedder_class: Type[Embedder]
-    configuration:dict
+    configuration: dict
 
     @property
     def odr_embedder_params(self):
-        return self.configuration['odr_params']['embedder_params']
+        return self.configuration["odr_params"]["embedder_params"]
 
     @property
     @abc.abstractmethod
@@ -65,15 +65,12 @@ class ODRModelWrappedMixin(metaclass=abc.ABCMeta):
             embedder_params=self.odr_embedder_params,
         )
 
+
 class ODRwSVDMixin(ODRModelWrappedMixin):
-    '''
-        ODR stands for Output Dimensionality Reduced
-    '''
+    """
+    ODR stands for Output Dimensionality Reduced
+    """
 
     @property
     def odr_embedder_class(self):
         return TruncatedSVDEmbedder
-
-
-
-

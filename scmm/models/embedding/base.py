@@ -41,7 +41,9 @@ class Embedder(metaclass=abc.ABCMeta):
         return self.transform(input=input, **kwargs), self
 
     def inverse_transform(self, input):
-        raise NotImplementedError(f'{self.__class__} does not implement any inverse function for the mapping to a space with a smaller dimensionality')
+        raise NotImplementedError(
+            f"{self.__class__} does not implement any inverse function for the mapping to a space with a smaller dimensionality"
+        )
 
 
 class EmbedderWrapperInputMixin(metaclass=abc.ABCMeta):
@@ -63,6 +65,7 @@ class EmbedderWrapperInputMixin(metaclass=abc.ABCMeta):
 
     def apply_dimensionality_reduction(self, input, **kwargs):
         return self.embedder.transform(input=input, **kwargs)
+
 
 class EmbedderWrapperOutputMixin(metaclass=abc.ABCMeta):
     configuration: dict

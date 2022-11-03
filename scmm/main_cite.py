@@ -1,4 +1,4 @@
-'''
+"""
 todo: temporary main to be refactored
 -> description: add argparse for command-line (CL) configuration set-up
 
@@ -11,7 +11,7 @@ todo: temporary main to be refactored
     2) check if the configuration name is present on the config dictionary
        else check if the configuration name is a file on the config folder
     4) run the pipline with the proper config or rise an error
-'''
+"""
 
 import argparse
 import importlib
@@ -20,14 +20,14 @@ import logging
 from scmm.problems.cite.configurations.config_dict import config_dict
 from scmm.utils.log import setup_logging
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # logging setup
     setup_logging("DEBUG")
     logger = logging.getLogger(__name__)
 
     # argparse setup
-    parser = argparse.ArgumentParser(description='scmm full pipline for cite problem, specifying a configuration')
-    parser.add_argument("config_name", type=str, help='configuration name or configuration file name')
+    parser = argparse.ArgumentParser(description="scmm full pipline for cite problem, specifying a configuration")
+    parser.add_argument("config_name", type=str, help="configuration name or configuration file name")
     args = parser.parse_args()
 
     if args.config_name in config_dict:
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     else:
         config_file = args.config_name
 
-    config_module = importlib.import_module("scmm.problems.cite.configurations."+config_file)
+    config_module = importlib.import_module("scmm.problems.cite.configurations." + config_file)
     logger.info("starting full pipeline with configuration: " f"{config_module.model_label}")
 
     configuration = config_module.configuration
@@ -43,5 +43,3 @@ if __name__ == '__main__':
 
     model_wrapper = model_class(configuration=configuration, label=config_module.model_label)
     model_wrapper.full_pipeline()
-
-

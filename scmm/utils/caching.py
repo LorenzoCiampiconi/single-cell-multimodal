@@ -20,7 +20,6 @@ def np_save_wrapper(cached_output, svd_caching_path):
     np.savez_compressed(svd_caching_path, cached_output=cached_output)
 
 
-
 def caching_function(
     *,
     file_label: str,
@@ -28,7 +27,7 @@ def caching_function(
     loading_function: Callable,
     saving_function: Callable,
     labelling_kwargs: Iterable[str],
-    cache_folder: Optional[str]=None,
+    cache_folder: Optional[str] = None,
 ):
     def decorator(fun):
         @wraps(fun)
@@ -62,17 +61,18 @@ def caching_function(
 
     return decorator
 
+
 def caching_method(
     *,
     file_label,
     file_extension,
-    loading_function: Optional[Callable]=None,
-    loading_method_ref: Optional[str]=None,
-    saving_function: Optional[Callable]=None,
-    saving_method_ref: Optional[str]=None,
-    labelling_kwargs: Optional[Iterable[str]]=(),
+    loading_function: Optional[Callable] = None,
+    loading_method_ref: Optional[str] = None,
+    saving_function: Optional[Callable] = None,
+    saving_method_ref: Optional[str] = None,
+    labelling_kwargs: Optional[Iterable[str]] = (),
     cache_folder=None,
-    object_labelling_attributes=None
+    object_labelling_attributes=None,
 ):
     def decorator(fun):
 
@@ -87,7 +87,9 @@ def caching_method(
                 file_name += f"_{runtime_labelling}"
 
             for kwarg in labelling_kwargs:
-                assert kwarg in labelling_kwargs, f"{kwarg} is not passed, or not passed as a keyword argument, please check the code."
+                assert (
+                    kwarg in labelling_kwargs
+                ), f"{kwarg} is not passed, or not passed as a keyword argument, please check the code."
                 file_name += f"_{kwargs}-{kwargs[kwarg]}"
 
             obj = args[0]
@@ -126,6 +128,3 @@ def caching_method(
         return decorated_method
 
     return decorator
-
-
-

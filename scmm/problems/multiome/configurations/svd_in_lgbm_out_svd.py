@@ -25,12 +25,10 @@ model_params = {
 output_embedder_params = {
     "seed": seed,
     "input_dim": original_dim,
-    "output_dim": 256,
+    "output_dim": 16,
 }
 
-odr_params = {
-    "embedder_params": output_embedder_params
-}
+odr_params = {"embedder_params": output_embedder_params}
 
 embedder_params = {
     "seed": seed,

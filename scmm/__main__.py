@@ -7,6 +7,3 @@ if __name__ == "__main__":
 
     model_wrapper = LGBMwMultilevelEmbedderCite(configuration=configuration, label=model_label)
     model_wrapper.full_pipeline()
-
-
-

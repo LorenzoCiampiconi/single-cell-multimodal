@@ -111,7 +111,9 @@ class SCMModelABC(metaclass=abc.ABCMeta):
 
         logger.info(f"{self.model_label} - performing cross validation")
         cv_out = self.cross_validation(X, Y)
-        logger.info(f"{self.model_label} - Average  metrics: " + " | ".join([f"({k})={v:.4}" for k, v in cv_out.mean().items()]))
+        logger.info(
+            f"{self.model_label} - Average  metrics: " + " | ".join([f"({k})={v:.4}" for k, v in cv_out.mean().items()])
+        )
 
         if refit or not perform_cross_validation:
             self.fit_model(X, Y)
@@ -121,7 +123,9 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         return cv_out
 
     def predict_public_test(self) -> np.array:
-        X_test_reduced = self.apply_dimensionality_reduction(input=self.test_input, runtime_labelling=f"{self.problem_label}_public_test", use_cache=True)
+        X_test_reduced = self.apply_dimensionality_reduction(
+            input=self.test_input, runtime_labelling=f"{self.problem_label}_public_test", use_cache=True
+        )
         return self._trained_model.predict(X_test_reduced)
 
     def generate_public_test_output(self, test_output: np.array):

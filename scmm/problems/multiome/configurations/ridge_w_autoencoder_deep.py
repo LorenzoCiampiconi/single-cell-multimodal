@@ -7,9 +7,7 @@ model_label = "lgbm_w_deep_autoencoder"
 seed = 0
 original_dim = None
 
-model_params = {
-    "copy_X": False
-}
+model_params = {"copy_X": False}
 
 
 cv_params = {"cv": 3, "scoring": common_metrics, "verbose": 10}

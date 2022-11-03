@@ -18,7 +18,7 @@ class TruncatedSVDEmbedder(Embedder):
         self.svd = TruncatedSVD(n_components=output_dim, random_state=seed, **kwargs)
         self.fitted = False
 
-    def _load_cached_svd(self, path:pathlib.Path):
+    def _load_cached_svd(self, path: pathlib.Path):
         loaded_obj: TruncatedSVDEmbedder = joblib.load(path)
 
         assert self.input_dim == loaded_obj.input_dim
@@ -31,7 +31,7 @@ class TruncatedSVDEmbedder(Embedder):
     @caching_method(
         file_label="embedder",
         file_extension="t-svd",
-        loading_method_ref='_load_cached_svd',
+        loading_method_ref="_load_cached_svd",
         saving_function=joblib.dump,
         labelling_kwargs={},
         object_labelling_attributes=("input_dim", "output_dim", "seed"),
