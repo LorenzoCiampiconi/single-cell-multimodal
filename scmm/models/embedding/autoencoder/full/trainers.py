@@ -11,7 +11,7 @@ from pytorch_lightning import callbacks as cbs
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
 
-from scmm.models.embedding.autoencoder.full.dataset import BaseDataset, as_numpy
+from scmm.models.embedding.autoencoder.full.dataset import BaseDataset, IODataset, as_numpy
 from scmm.models.embedding.base import Embedder
 from scmm.utils.log import settings
 
@@ -28,6 +28,8 @@ class AutoEncoderTrainer(Embedder, metaclass=abc.ABCMeta):
 
         self._model_params = model_params
         self._train_params = train_params
+
+        pl.seed_everything(self.seed, workers=True)
 
         self.model = self.build_model()
         self.init_trainer()
@@ -90,8 +92,8 @@ class AutoEncoderTrainer(Embedder, metaclass=abc.ABCMeta):
             **self.trainer_kwargs,
         )
 
-    def build_data_loader(self, mat, shuffle=False):
-        ds = BaseDataset(mat)
+    def build_data_loader(self, input, *, shuffle=False, **kwargs):
+        ds = BaseDataset(input)
         dsl = DataLoader(
             ds,
             shuffle=shuffle,
@@ -102,15 +104,6 @@ class AutoEncoderTrainer(Embedder, metaclass=abc.ABCMeta):
         )
         return dsl
 
-    # @caching_method(
-    #     file_label="embedder",
-    #     file_extension="t-svd",
-    #     loading_method_ref='_load_cached_svd',
-    #     saving_function=joblib.dump,
-    #     labelling_kwargs={},
-    #     object_labelling_attributes=("input_dim", "output_dim", "seed"),
-    #     cache_folder="autoencoder",
-    # )
     def fit(self, *, input: ArrayLike, **kwargs):
         dsl = self.build_data_loader(input, shuffle=True)
         self.trainer.fit(self.model, train_dataloaders=dsl)
@@ -140,3 +133,43 @@ class AutoEncoderTrainer(Embedder, metaclass=abc.ABCMeta):
 
     def load_model(self, path, **kwargs):
         return self.autoencoder_class.load_from_checkpoint(path, **kwargs)
+
+
+class MultiTaskAutoEncoderTrainer(AutoEncoderTrainer, metaclass=abc.ABCMeta):
+    def build_data_loader(self, input, *, Y=None, shuffle=False, **kwargs):
+        assert Y is not None
+        ds = IODataset(input, Y)
+        dsl = DataLoader(
+            ds,
+            shuffle=shuffle,
+            pin_memory=True,
+            **self.dataloader_kwargs
+            # batch_size=64,
+            # num_workers=0,
+        )
+        return dsl
+
+    def fit(self, *, input: ArrayLike, Y=None, **kwargs):
+        assert Y is not None
+        dsl = self.build_data_loader(input, Y=Y, shuffle=True)
+        self.trainer.fit(self.model, train_dataloaders=dsl)
+        self.fitted = True
+        return self
+
+    def transform(self, *, input: ArrayLike, **kwargs) -> np.array:
+        dsl = super().build_data_loader(input)
+        encoder = self.model.encoder.eval()
+
+        with torch.no_grad():
+            out = as_numpy(torch.cat([encoder(x) for x in dsl])).reshape(-1, self.latent_dim)
+        logger.info("Autoencoder has transformed the input")
+        return out
+
+    def inverse_transform(self, *, input: ArrayLike, **kwargs) -> np.array:
+        dsl = super().build_data_loader(input)
+        decoder = self.model.decoder.decoder.eval()
+
+        with torch.no_grad():
+            out = as_numpy(torch.cat([decoder(x) for x in dsl])).reshape(-1, self.input_dim)
+        logger.info("Autoencoder has inverse transformed the input")
+        return out

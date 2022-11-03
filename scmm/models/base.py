@@ -99,14 +99,14 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     def process_cv_out(self, cv_raw):
         return pd.DataFrame(cv_raw)
 
-    def fit_model(self, X, Y):
-        self._trained_model = self.instantiate_model(**self.model_instantiation_kwargs).fit(X, Y)
+    def fit_model(self, X, Y, **kwargs):
+        self._trained_model = self.instantiate_model(**self.model_instantiation_kwargs).fit(X, Y, **kwargs)
 
     def full_pipeline(self, refit=True, perform_cross_validation=True):
         X, Y = self.train_input, self.train_target
 
         logger.debug(f"{self.model_label} - applying dimensionality reduction")
-        X = self.fit_and_apply_dimensionality_reduction(input=X, runtime_labelling=self.problem_label, use_cache=True)
+        X = self.fit_and_apply_dimensionality_reduction(input=X, Y=Y, runtime_labelling=self.problem_label, use_cache=True)
         logger.debug(f"{self.model_label} - applying dimensionality reduction - Done")
 
         logger.info(f"{self.model_label} - performing cross validation")

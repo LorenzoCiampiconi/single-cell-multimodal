@@ -30,18 +30,15 @@ class BaseDataset(Dataset):
 
 
 class IODataset(BaseDataset):
-    def __init__(self, mat: NDArray, ds: xr.Dataset, output_vars: List[str]) -> None:
+    def __init__(self, mat: NDArray, outmat: NDArray) -> None:
         super().__init__(mat)
-        self.ds = ds
-        self.output_vars = output_vars
+        self.outmat = outmat
 
     def __getitem__(self, index) -> Tuple[torch.Tensor, List[torch.Tensor]]:
         t_input = super().__getitem__(index)
+        arr = self.outmat[index, :].ravel()
+        t = as_tensor(arr)
 
-        outputs = [t_input]
-        for var in self.output_vars:
-            arr = self.ds[var]
-            t = as_tensor(arr.data)
-            outputs.append(t)
+        outputs = [t_input, t]
 
         return t_input, outputs

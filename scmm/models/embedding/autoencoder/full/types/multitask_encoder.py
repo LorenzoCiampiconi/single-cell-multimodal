@@ -23,10 +23,10 @@ class MultiTaskEncoder(BasicAutoEncoder):
             ],
             prefix="recon_feat/val",
         )
-        self.save_hyperparameters()
+        self.save_hyperparameters(ignore=["encoder", 'decoder'])
 
-    def forward(self, x, ctx):
-        z = self.encoder(x, ctx)
+    def forward(self, x):
+        z = self.encoder(x)
         y_hat, feat_hat = self.decoder(z)
         return y_hat, feat_hat
 
@@ -43,7 +43,7 @@ class MultiTaskEncoder(BasicAutoEncoder):
     def training_step(self, batch, batch_idx):
         _, (input_loss, feat_loss) = self.main_training(batch)
 
-        self.log("recon_loss/spectrum", input_loss, on_step=True, on_epoch=True)
+        self.log("recon_loss/input", input_loss, on_step=True, on_epoch=True)
         self.log("recon_loss/feat", feat_loss, on_step=True, on_epoch=True)
 
         loss = self.input_coef * input_loss + feat_loss

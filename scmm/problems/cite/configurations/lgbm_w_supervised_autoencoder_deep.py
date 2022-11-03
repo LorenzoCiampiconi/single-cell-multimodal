@@ -4,7 +4,7 @@ from scmm.problems.cite.concrete import LGBMwMultilevelEmbedderCite
 from scmm.problems.metrics import common_metrics
 from torch import nn
 
-model_label = "lgbm_w_autoencoder_ago"
+model_label = "lgbm_w_supervised_autoencoder_deep"
 model_class = LGBMwMultilevelEmbedderCite
 seed = 0
 original_dim = None
@@ -33,8 +33,8 @@ dataloader_kwargs = {
     "num_workers": 4,
 }
 trainer_kwargs = {
-    "accelerator": "gpu",
-    "max_epochs": 20,
+    # "accelerator": "gpu",
+    "max_epochs": 50,
     "check_val_every_n_epoch": 1,
     # "val_check_interval": 1,
     "log_every_n_steps": 50,
@@ -42,28 +42,35 @@ trainer_kwargs = {
 }
 net_params = {
     "lr": 1e-3,
-    "shrinking_factors": (2, 2),
-    "activation_function": nn.ReLU,
+    "shrinking_factors": (2, 2, 2, 2),
+    "activation_function": nn.SELU,
+    "input_coef": 0.5,
+    "features_dim": 140,
+    # "extra_head"
 }
+
+svd_out_dim = 2048
+latent_dim = 128
+
 embedder_params = {
     "seed": seed,
     "input_dim": original_dim,
-    "output_dim": 200,
+    "output_dim": latent_dim,
     "embedders_config": [
         (
             TruncatedSVDEmbedder,
             {
                 "seed": seed,
                 "input_dim": original_dim,
-                "output_dim": 800,
+                "output_dim": svd_out_dim,
             },
         ),
         (
             BasicAutoEncoderEmbedder,
             {
                 "seed": seed,
-                "input_dim": 800,
-                "output_dim": 200,
+                "input_dim": svd_out_dim,
+                "output_dim": latent_dim,
                 "model_params": net_params,
                 "train_params": {
                     "logger_kwargs": logger_kwargs,
@@ -75,9 +82,23 @@ embedder_params = {
     ],
 }
 
+for embedder_config in embedder_params["embedders_config"]:
+    if "model_params" in embedder_config[1] and "shrinking_factors" in embedder_config[1]["model_params"]:
+        input_dim = embedder_config[1]["input_dim"]
+        output_dim = embedder_config[1]["output_dim"]
+
+        final_dim = input_dim
+        for factor in embedder_config[1]["model_params"]["shrinking_factors"]:
+            final_dim = final_dim // factor
+
+        assert final_dim == output_dim
+
+
 configuration = {
     "cv_params": cv_params,
     "model_params": model_params,
     "embedder_params": embedder_params,
     "seed": seed,
 }
+
+model_label = f"lgbm_w_{len(net_params['shrinking_factors'])}lrs-deep_autoencoder_dim-{svd_out_dim}->{latent_dim}"

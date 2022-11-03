@@ -13,7 +13,7 @@ class FittablePredictingEstimator(BaseEstimator):
         pass
 
     @abc.abstractmethod
-    def predict(self, X):
+    def predict(self, X, **kwargs):
         pass
 
 
@@ -29,10 +29,10 @@ class OutputDimensionalityReducedModelWrapper(FittablePredictingEstimator):
         self._is_fitted = True
         return self
 
-    def predict(self, X):
+    def predict(self, X, **kwargs):
         assert self._is_fitted, f"{self} has not been fitted yet."
-        Y_hat_r = self._wrapped_model.predict(X)
-        Y_hat = self._dimensionality_reducer.inverse_transform(Y_hat_r)
+        Y_hat_r = self._wrapped_model.predict(X, **kwargs)
+        Y_hat = self._dimensionality_reducer.inverse_transform(input=Y_hat_r, **kwargs)
         return Y_hat
 
     def fit_predict(self, X, Y, **kwargs):

@@ -43,7 +43,7 @@ class MultiLevelEmbedder(Embedder):
 
         return self
 
-    def inverse_transform(self, input):
+    def inverse_transform(self, *, input, **kwargs):
         assert self.fitted and all(
             e.is_fit for e in self._fitted_embedder
         ), "this multi level embedder has not been fitted"

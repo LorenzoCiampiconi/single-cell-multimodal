@@ -40,7 +40,7 @@ class Embedder(metaclass=abc.ABCMeta):
 
         return self.transform(input=input, **kwargs), self
 
-    def inverse_transform(self, input):
+    def inverse_transform(self, *, input, **kwargs):
         raise NotImplementedError(
             f"{self.__class__} does not implement any inverse function for the mapping to a space with a smaller dimensionality"
         )

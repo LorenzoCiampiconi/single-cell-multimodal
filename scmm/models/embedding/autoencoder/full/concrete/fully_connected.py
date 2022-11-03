@@ -1,15 +1,14 @@
 import logging
 from typing import Type
 
-import torch
 import pytorch_lightning as pl
-
+import torch
 from torch import nn
-from scmm.models.embedding.autoencoder.full.types.basic import BasicAutoEncoder
 
-from scmm.models.embedding.autoencoder.full.dataset import as_numpy
 from scmm.models.embedding.autoencoder.encoder.base import FullyConnectedEncoder
-from scmm.models.embedding.autoencoder.full.trainer import AutoEncoderTrainer
+from scmm.models.embedding.autoencoder.full.dataset import as_numpy
+from scmm.models.embedding.autoencoder.full.trainers import AutoEncoderTrainer
+from scmm.models.embedding.autoencoder.full.types.basic import BasicAutoEncoder
 from scmm.models.embedding.base import Embedder
 
 logger = logging.getLogger(__name__)
@@ -21,8 +20,6 @@ class BasicAutoEncoderEmbedder(AutoEncoderTrainer, Embedder):
         return BasicAutoEncoder
 
     def build_model(self):
-        pl.seed_everything(self.seed, workers=True)
-
         lr = self.model_params["lr"]
 
         decoder = None

@@ -26,10 +26,19 @@ class ExtraFeatureDecoder(nn.Module):
 
 
 class JointDecoder(nn.Module):
-    def __init__(self, *, latent_dim: int, output_dim: int, decoder: nn.Module, head: Optional[nn.Module] = None):
+    def __init__(
+        self,
+        *,
+        latent_dim: int,
+        output_dim: int,
+        features_dim: int,
+        decoder: nn.Module,
+        head: Optional[nn.Module] = None,
+    ):
         super().__init__()
+        self.latent_dim = latent_dim
         self.decoder = decoder
-        self.features = ExtraFeatureDecoder(latent_dim, output_dim, model=head)
+        self.features = ExtraFeatureDecoder(latent_dim=latent_dim, output_dim=features_dim, model=head)
 
     def forward(self, x):
         return self.decoder(x), self.features(x)

@@ -5,28 +5,26 @@ import torch
 import pytorch_lightning as pl
 
 from torch import nn
-from scmm.models.embedding.autoencoder.full.types.basic import BasicAutoEncoder
+from scmm.models.embedding.autoencoder.decoder.two_head import JointDecoder
+from scmm.models.embedding.autoencoder.full.types.multitask_encoder import MultiTaskEncoder
 
 from scmm.models.embedding.autoencoder.full.dataset import as_numpy
 from scmm.models.embedding.autoencoder.encoder.base import FullyConnectedEncoder
-from scmm.models.embedding.autoencoder.full.trainer import AutoEncoderTrainer
+from scmm.models.embedding.autoencoder.full.trainers import MultiTaskAutoEncoderTrainer
+from scmm.models.embedding.base import Embedder
+
 
 logger = logging.getLogger(__name__)
 
 
-class BasicAutoEncoderEmbedder(AutoEncoderTrainer):
-
+class MultiTaskEncoderEmbedder(MultiTaskAutoEncoderTrainer, Embedder):
     @property
     def autoencoder_class(self) -> Type[pl.LightningModule]:
-        return BasicAutoEncoder
-
-    # def __reduce__(self): todo
-    #     return (BasicAutoEncoderEmbedder, (self.to_dict(), self.__merge__, self.__iterable_as_set__, self.__label__))
+        return MultiTaskEncoder
 
     def build_model(self):
-        pl.seed_everything(self.seed, workers=True)
-
         lr = self.model_params["lr"]
+        input_coef = self.model_params["input_coef"]
 
         decoder = None
         if "encoder_sequential" in self.model_params:
@@ -61,9 +59,23 @@ class BasicAutoEncoderEmbedder(AutoEncoderTrainer):
                 fully_connected_sequential=encoder_sequential,
             )
 
-        return self.autoencoder_class(lr=lr, encoder=encoder, decoder=decoder)
+        if decoder is None:
+            decoder = encoder.mirror_sequential_for_decoding()
+
+        features_dim = self.model_params["features_dim"]
+        head = self.model_params.get("extra_head", None)
+
+        decoder = JointDecoder(
+            latent_dim=self.latent_dim,
+            output_dim=self.output_dim,
+            features_dim=features_dim,
+            decoder=decoder,
+            head=head,
+        )
+
+        return self.autoencoder_class(lr=lr, input_coef=input_coef, encoder=encoder, decoder=decoder)
 
     def _predict(self, ds):
-        out = self.trainer.predict(self.model, ds)
+        out, extra = self.trainer.predict(self.model, ds)  # TODO broken? use extra
         out = as_numpy(torch.cat(out)).reshape(-1, self.input_dim)
         return out
