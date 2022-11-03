@@ -17,7 +17,7 @@ import argparse
 import importlib
 import logging
 
-from scmm.problems.multiome.configurations.config_dict import config_dict
+from scmm.problems.multiome.configurations import config_dict
 from scmm.utils.log import setup_logging
 
 if __name__ == "__main__":
