@@ -20,8 +20,12 @@ class MultiModelWrapperMixin(metaclass=abc.ABCMeta):
     def model_instantiation_kwargs(self):
         return {"estimator": self.model_class(**self.model_params)}
 
+    def build_model_params_for_tuning(self, params):
+        return {"estimator": self.model_class(**params)}
+
 
 class MultiOutputRegressorMixin(MultiModelWrapperMixin):
     @property
     def model_wrapper_class(self):
         return MultiOutputRegressor
+
