@@ -5,8 +5,7 @@ import click
 import pandas as pd
 
 from scmm.problems.cite.configurations import config_dict as cite_configs
-from scmm.problems.multiome.configurations import \
-    config_dict as multiome_configs
+from scmm.problems.multiome.configurations import config_dict as multiome_configs
 from scmm.utils.appdirs import app_static_dir
 
 logger = logging.getLogger(__name__)
@@ -25,8 +24,10 @@ def load_submission(problem, name):
 def build_model(problem, name, configs):
     if name not in configs:
         logger.warn(f"Add the configutration to the proper dict please! Dynamic loading will be deprecated shortly")
-    config_file = configs.get(name, name)
-    config_module = importlib.import_module(f"scmm.problems.{problem}.configurations." + config_file)
+        config_module = importlib.import_module(f"scmm.problems.{problem}.configurations." + name)
+    else:
+        config_module = configs[name]
+
     configuration = config_module.configuration
     model_class = config_module.model_class
 
