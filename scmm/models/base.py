@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 from typing import Any, Dict
 
+import optuna
 import numpy as np
 import pandas as pd
 from scipy import sparse
@@ -87,9 +88,10 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     def apply_dimensionality_reduction(self, input, **kwargs):
         return input
 
-    def cross_validation(self, X, Y, **kwargs):
+    def cross_validation(self, X, Y, custom_params = None, **kwargs):
         # TODO with strategy: {self.cv_params['strategy']}")
-        instantiate_model = lambda: self.instantiate_model(**self.model_instantiation_kwargs)
+        model_params = custom_params if custom_params is not None else self.model_instantiation_kwargs
+        instantiate_model = lambda: self.instantiate_model(**model_params)
         cv_raw = cross_validate(instantiate_model, X, Y, **self.cv_params)
         cv_out = self.process_cv_out(cv_raw)
         return cv_out
@@ -117,6 +119,72 @@ class SCMModelABC(metaclass=abc.ABCMeta):
             self.generate_public_test_output(Y_test)
 
         return cv_out
+
+    '''
+    def tuning(self):
+        params = {"learning_rate": 0.1,
+    "objective": "regression",
+    "metric": "rmse",  # mae',
+    "random_state": 0,
+    "reg_alpha": 0.03,
+    "reg_lambda": 0.002,
+    "colsample_bytree": 0.8,
+    "subsample": 0.6,
+    "max_depth": 10,
+    "num_leaves": 186,
+    "min_child_samples": 263}
+        X, Y = self.train_input, self.train_target
+        logger.debug(f"{self.model_label} - applying dimensionality reduction")
+        X = self.fit_and_apply_dimensionality_reduction(input=X, runtime_labelling=self.problem_label)
+        logger.debug(f"{self.model_label} - applying dimensionality reduction - Done")
+        logger.info(f"{self.model_label} - performing cross validation")
+        cv_out = self.cross_validation(X, Y, custom_params=self.build_model_params_for_tuning(params))
+        logger.info(f"{self.model_label} - Average  metrics: " + " | ".join(
+            [f"({k})={v:.4}" for k, v in cv_out.mean().items()]))
+    '''
+    def optuna_pipeline(self):
+        study = optuna.create_study(direction='maximize')
+        study.optimize(self.optuna_objective, n_trials=3)
+        print('Number of finished trials:', len(study.trials))
+        print('Best trial:', study.best_trial.params)
+
+        ...
+
+    def optuna_objective(self, trial):
+        params = {
+            'metric': 'rmse',
+            'random_state': 48,
+            'n_estimators': 20000,
+            'reg_alpha': trial.suggest_loguniform('reg_alpha', 1e-3, 10.0),
+            'reg_lambda': trial.suggest_loguniform('reg_lambda', 1e-3, 10.0),
+            'colsample_bytree': trial.suggest_categorical('colsample_bytree', [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]),
+            'subsample': trial.suggest_categorical('subsample', [0.4, 0.5, 0.6, 0.7, 0.8, 1.0]),
+            'learning_rate': trial.suggest_categorical('learning_rate', [0.006, 0.008, 0.01, 0.014, 0.017, 0.02]),
+            'max_depth': trial.suggest_categorical('max_depth', [10, 20, 100]),
+            'num_leaves': trial.suggest_int('num_leaves', 1, 1000),
+            'min_child_samples': trial.suggest_int('min_child_samples', 1, 300),
+            'cat_smooth': trial.suggest_int('min_data_per_groups', 1, 100)
+        }
+
+        X, Y = self.train_input, self.train_target
+        logger.debug(f"{self.model_label} - applying dimensionality reduction")
+        X = self.fit_and_apply_dimensionality_reduction(input=X, runtime_labelling=self.problem_label)
+        logger.debug(f"{self.model_label} - applying dimensionality reduction - Done")
+        logger.info(f"{self.model_label} - performing cross validation")
+        cv_out = self.cross_validation(X, Y, custom_params=self.build_model_params_for_tuning(params))
+        logger.info(f"{self.model_label} - Average  metrics: " + " | ".join(
+            [f"({k})={v:.4}" for k, v in cv_out.mean().items()]))
+
+        vals = [v for k, v in cv_out.mean().items()]
+        #todo mod
+        return vals[0]
+
+
+
+
+    def build_params_for_tuning(self,params):
+        return params
+
 
     def predict_public_test(self) -> np.array:
         X_test_reduced = self.apply_dimensionality_reduction(input=self.test_input, runtime_labelling=f"{self.problem_label}_public_test")
