@@ -4,6 +4,7 @@ import logging
 import click
 import pandas as pd
 
+from scmm.models.base import ModelWrapperABC
 from scmm.problems.cite.configurations import config_dict as cite_configs
 from scmm.problems.multiome.configurations import config_dict as multiome_configs
 from scmm.utils.appdirs import app_static_dir
@@ -21,7 +22,7 @@ def load_submission(problem, name):
     return pd.read_csv(app_static_dir(f"out/{problem}") / f"{name}.csv", index_col="row_id").squeeze("columns")
 
 
-def build_model(problem, name, configs):
+def build_model(problem, name, configs) -> ModelWrapperABC:
     if name not in configs:
         logger.warn(f"Add the configutration to the proper dict please! Dynamic loading will be deprecated shortly")
         config_module = importlib.import_module(f"scmm.problems.{problem}.configurations." + name)
@@ -49,7 +50,7 @@ def get_submission(problem, name, configs):
                 abort=True,
             )
             model.fit_model()
-        output = model.predict_public()
+        output = model.predict_public_test()
         output.to_csv(app_static_dir(f"out/{problem}") / f"{name}.csv")
 
     return output

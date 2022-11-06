@@ -1,7 +1,9 @@
 import abc
 import logging
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict
+from typing_extensions import Self
 
 import optuna
 import numpy as np
@@ -13,7 +15,7 @@ from scmm.utils.scikit_crossval import cross_validate
 logger = logging.getLogger(__name__)
 
 
-class SCMModelABC(metaclass=abc.ABCMeta):
+class ModelWrapperABC(metaclass=abc.ABCMeta):
     invalid_test_index: int = 7476
     public_test_index: int
 
@@ -22,23 +24,39 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         self._model_label = f"{label}" if label else self.__class__.__name__
         self._trained_model = None
 
+    # labels
     @property
     def model_label(self):
         return f"{self.problem_label}_{self._model_label}"
-
-    @property
-    def is_trained(self):
-        return self._trained_model is not None
 
     @property
     @abc.abstractmethod
     def problem_label(self) -> str:
         pass
 
+    # config
     @property
     def configuration(self):
         return self._configuration
 
+    @property
+    def seed(self):
+        return self.configuration["seed"]
+
+    @property
+    @abc.abstractmethod
+    def model_class(self):
+        pass
+
+    @property
+    def model_params(self):
+        return self.configuration["model_params"]
+
+    @property
+    def cv_params(self):
+        return self.configuration["cv_params"]
+
+    # inputs
     @property
     @abc.abstractmethod
     def train_input(self) -> sparse.csr_array:
@@ -54,33 +72,22 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     def test_input(self) -> sparse.csr_array:
         pass
 
-    def instantiate_model(self, **model_instantiation_kwargs):
-        return self.model_class(**model_instantiation_kwargs)
+    # build, load & save
+    def instantiate_model(self, **kwargs):
+        return self.model_class(**kwargs)
 
-    @property
     @abc.abstractmethod
-    def model_class(self):
+    def load(self, path: Path | str) -> Self:
         pass
 
-    @property
-    def model_instantiation_kwargs(self):
-        return self.model_params
+    @abc.abstractmethod
+    def save(self, path: Path | str) -> None:
+        pass
 
+    # training methods
     @property
-    def cv_params(self):
-        return self.configuration["cv_params"]
-
-    @property
-    def model_params(self):
-        return self.configuration["model_params"]
-
-    @property
-    def seed(self):
-        return self.configuration["seed"]
-
-    @property
-    def embedder_params(self):
-        return self.configuration["embedder_params"]
+    def is_trained(self):
+        return self._trained_model is not None
 
     def fit_and_apply_dimensionality_reduction(self, input, **kwargs):
         return input
@@ -90,7 +97,8 @@ class SCMModelABC(metaclass=abc.ABCMeta):
 
     def cross_validation(self, X, Y, custom_params=None, **kwargs):
         # TODO with strategy: {self.cv_params['strategy']}")
-        model_params = custom_params if custom_params is not None else self.model_instantiation_kwargs
+
+        model_params = custom_params if custom_params is not None else self.model_params
         instantiate_model = lambda: self.instantiate_model(**model_params)
         cv_raw = cross_validate(instantiate_model, X, Y, **self.cv_params)
         cv_out = self.process_cv_out(cv_raw)
@@ -100,7 +108,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         return pd.DataFrame(cv_raw)
 
     def fit_model(self, X, Y, **kwargs):
-        self._trained_model = self.instantiate_model(**self.model_instantiation_kwargs).fit(X, Y, **kwargs)
+        self._trained_model = self.instantiate_model(**self.model_params).fit(X, Y, **kwargs)
 
     def pre_process_target_for_dim_reduction(self, Y):
         return Y

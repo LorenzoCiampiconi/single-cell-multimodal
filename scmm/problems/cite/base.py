@@ -5,12 +5,12 @@ import numpy as np
 from scipy import sparse
 
 from scmm.utils.data_handling import load_sparse
-from scmm.models.base import SCMModelABC
+from scmm.models.base import ModelWrapperABC
 
 logger = logging.getLogger(__name__)
 
 
-class CiteModelABC(SCMModelABC, metaclass=abc.ABCMeta):
+class CiteModelABC(ModelWrapperABC, metaclass=abc.ABCMeta):
     public_test_index: int = 0
 
     def __init__(self, **kwargs):

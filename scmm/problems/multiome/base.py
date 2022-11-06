@@ -5,12 +5,12 @@ import numpy as np
 from scipy import sparse
 
 from scmm.utils.data_handling import load_sparse
-from scmm.models.base import SCMModelABC
+from scmm.models.base import ModelWrapperABC
 
 logger = logging.getLogger(__name__)
 
 
-class MultiomeModelABC(SCMModelABC, metaclass=abc.ABCMeta):
+class MultiomeModelABC(ModelWrapperABC, metaclass=abc.ABCMeta):
     public_test_index: int = 6812820
 
     def __init__(self, **kwargs):
