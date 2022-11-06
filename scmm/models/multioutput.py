@@ -28,4 +28,3 @@ class MultiOutputRegressorMixin(MultiModelWrapperMixin):
     @property
     def model_wrapper_class(self):
         return MultiOutputRegressor
-

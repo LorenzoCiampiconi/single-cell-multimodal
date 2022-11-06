@@ -23,7 +23,7 @@ class MultiTaskEncoder(BasicAutoEncoder):
             ],
             prefix="recon_feat/val",
         )
-        self.save_hyperparameters(ignore=["encoder", 'decoder'])
+        self.save_hyperparameters(ignore=["encoder", "decoder"])
 
     def forward(self, x):
         z = self.encoder(x)

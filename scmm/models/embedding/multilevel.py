@@ -20,10 +20,9 @@ class MultiLevelEmbedder(Embedder):
         super().__init__(seed=seed, input_dim=input_dim, output_dim=output_dim)
         self.embedders_config = embedders_config
         self._fitted_embedder: List[Embedder] = []
-        self.fitted = False
 
     def transform(self, *, input, **kwargs) -> np.array:
-        assert self.fitted and all(
+        assert self.is_fit and all(
             e.is_fit for e in self._fitted_embedder
         ), "this multi level embedder has not been fitted"
         for embedder in self._fitted_embedder:
@@ -39,12 +38,12 @@ class MultiLevelEmbedder(Embedder):
             # runtime_labelling = kwargs['runtime_labelling']
             # runtime_labelling += "" #todo
 
-        self.fitted = True
+        self._fitted = True
 
         return self
 
     def inverse_transform(self, *, input, **kwargs):
-        assert self.fitted and all(
+        assert self.is_fit and all(
             e.is_fit for e in self._fitted_embedder
         ), "this multi level embedder has not been fitted"
         for embedder in reversed(self._fitted_embedder):

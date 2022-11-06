@@ -46,7 +46,7 @@ dataloader_kwargs = {
 }
 trainer_kwargs = {
     # "accelerator": "gpu",
-    "max_epochs": 4,
+    "max_epochs": 1,
     "check_val_every_n_epoch": 1,
     # "val_check_interval": 1,
     "log_every_n_steps": 50,

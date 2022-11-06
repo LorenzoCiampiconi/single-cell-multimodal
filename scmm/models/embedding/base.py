@@ -65,4 +65,3 @@ class EmbedderWrapperInputMixin(metaclass=abc.ABCMeta):
 
     def apply_dimensionality_reduction(self, input, **kwargs):
         return self.embedder.transform(input=input, **kwargs)
-    

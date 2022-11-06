@@ -23,8 +23,23 @@ class OutputDimensionalityReducedModelWrapper(FittablePredictingEstimator):
         self._wrapped_model = wrapped_model
         self._dimensionality_reducer: Embedder = embedder_class(**embedder_params)
 
+    def transform_label(self, Y, **kwargs):
+        if self._dimensionality_reducer.is_fit:
+            return self._dimensionality_reducer.transform(Y=Y, **kwargs)
+        else:
+            Y_r, self._dimensionality_reducer = self._dimensionality_reducer.fit_transform(
+                input=Y, runtime_labelling=f"odr", **kwargs
+            )
+            return Y_r
+
+    def inverse_transform_label(self, Y, **kwargs):
+        assert self._dimensionality_reducer.is_fit
+        return self._dimensionality_reducer.inverse_transform(Y=Y, **kwargs)
+
     def fit(self, X, Y, **kwargs) -> FittablePredictingEstimator:
-        Y_r, self._dimensionality_reducer = self._dimensionality_reducer.fit_transform(input=Y, runtime_labelling=f"odr", **kwargs)
+        Y_r, self._dimensionality_reducer = self._dimensionality_reducer.fit_transform(
+            input=Y, runtime_labelling=f"odr", **kwargs
+        )
         self._wrapped_model.fit(X, Y_r)
         self._is_fitted = True
         return self
@@ -46,6 +61,7 @@ class ODRModelWrappedMixin(metaclass=abc.ABCMeta):
 
     model_class: Type
     model_params: dict
+    model_instantiation_kwargs: dict
     odr_embedder_class: Type[Embedder]
     configuration: dict
 
@@ -57,6 +73,16 @@ class ODRModelWrappedMixin(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def odr_embedder_class(self):
         pass
+
+    def pre_process_target_for_dim_reduction(self, Y, model_kwargs=None):
+        if self.configuration["odr_params"]["odr_also_on_target_for_input_dim_reduction"]:
+            if model_kwargs is None:
+                model_kwargs = self.model_instantiation_kwargs
+            odr_obj: OutputDimensionalityReducedModelWrapper = self.instantiate_model(**model_kwargs)
+            Y_r = odr_obj.transform_label(Y)
+            return Y_r
+        else:
+            return Y
 
     def instantiate_model(self, **model_instantiation_kwargs):
         return OutputDimensionalityReducedModelWrapper(

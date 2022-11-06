@@ -28,9 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 def load_submission(problem, name):
-    return pd.read_csv(app_static_dir(f"out/{problem}") / f"{name}.csv", index_col="row_id").squeeze(
-        "columns"
-    )
+    return pd.read_csv(app_static_dir(f"out/{problem}") / f"{name}.csv", index_col="row_id").squeeze("columns")
 
 
 def load_model(problem, name, configs):
@@ -45,7 +43,7 @@ def load_model(problem, name, configs):
 
 
 @click.group()
-@click.option('--debug/--no-debug', default=False)
+@click.option("--debug/--no-debug", default=False)
 def cli(debug):
     # logging setup
     setup_logging("DEBUG" if debug else "INFO")
@@ -54,8 +52,8 @@ def cli(debug):
 
 
 @cli.command("submission")
-@click.argument('cite')
-@click.argument('multiome')
+@click.argument("cite")
+@click.argument("multiome")
 def submission(cite: str, multiome: str):
     def get_submission(problem, name, configs):
         if (app_static_dir(f"out/{problem}") / f"{name}.csv").exists():
@@ -67,7 +65,7 @@ def submission(cite: str, multiome: str):
         return output
 
     subs = []
-    for problem, name, config in zip(['cite', 'multiome'], [cite, multiome], [cite_configs, multiome_configs]):
+    for problem, name, config in zip(["cite", "multiome"], [cite, multiome], [cite_configs, multiome_configs]):
         sub = get_submission(problem, name, config)
         sub.to_csv(app_static_dir(f"out/{problem}") / f"{name}.csv")
         subs.append(sub)
