@@ -16,7 +16,6 @@ class TruncatedSVDEmbedder(Embedder):
     def __init__(self, *, seed: int, input_dim: int, output_dim: int, **kwargs):
         super().__init__(seed=seed, input_dim=input_dim, output_dim=output_dim)
         self.svd = TruncatedSVD(n_components=output_dim, random_state=seed, **kwargs)
-        self.fitted = False
 
     def _load_cached_svd(self, path: pathlib.Path):
         loaded_obj: TruncatedSVDEmbedder = joblib.load(path)
@@ -39,7 +38,7 @@ class TruncatedSVDEmbedder(Embedder):
     )
     def fit(self, *, input, **kwargs):
         self.svd.fit(input)
-        self.fitted = True
+        self._fitted = True
         return self
 
     @caching_method(

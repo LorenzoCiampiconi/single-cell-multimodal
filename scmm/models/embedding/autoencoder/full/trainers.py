@@ -24,7 +24,6 @@ class AutoEncoderTrainer(Embedder, metaclass=abc.ABCMeta):
     ):
         super().__init__(seed=seed, input_dim=input_dim, output_dim=output_dim)
         self.latent_dim = output_dim
-        self.fitted = False
 
         self._model_params = model_params
         self._train_params = train_params
@@ -107,7 +106,7 @@ class AutoEncoderTrainer(Embedder, metaclass=abc.ABCMeta):
     def fit(self, *, input: ArrayLike, **kwargs):
         dsl = self.build_data_loader(input, shuffle=True)
         self.trainer.fit(self.model, train_dataloaders=dsl)
-        self.fitted = True
+        self._fitted = True
         return self
 
     def transform(self, *, input: ArrayLike, **kwargs) -> np.array:
@@ -153,7 +152,7 @@ class MultiTaskAutoEncoderTrainer(AutoEncoderTrainer, metaclass=abc.ABCMeta):
         assert Y is not None
         dsl = self.build_data_loader(input, Y=Y, shuffle=True)
         self.trainer.fit(self.model, train_dataloaders=dsl)
-        self.fitted = True
+        self._fitted = True
         return self
 
     def transform(self, *, input: ArrayLike, **kwargs) -> np.array:
