@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class MultiomeModelABC(SCMModelABC, metaclass=abc.ABCMeta):
-    public_test_index: int = 0
+    public_test_index: int = 6812820
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
