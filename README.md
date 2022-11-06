@@ -21,16 +21,19 @@ does not require some time dependent forecasting, while the private does.
 - ~~assess distribution of the inputs, with and without zeros~~
 - ~~assess svd singular values behaviour~~
 - ~~extract a categorical matrix and clusterize input to augment feature data reduced by svd~~
-- extend pipeline to Multiome problem
+- ~~extend pipeline to Multiome problem~~
+- tuning pipeline
+- extend the model so that is trainable on specific output (for LGBM)
+  - implementation of wrapper that split outputs (needed as the supervised part of the autoencoder is supposed to be trained)
 - train an encoder-decoder model to embed input feature after more conservative SVD
     - basic encoder decoder
       - ~~implementation~~
       - ~~pipeline integration~~
       - tuning
-      - performance assessment
-    - multi task fashion:
-      - verify integration with pipeline
-      - add regression as a task
+      - ~~performance assessment~~
+    - ~~multi task fashion:~~
+      - ~~verify integration with pipeline~~
+      - ~~add regression as a task~~
       - add metadata prediction as task
 - verify multi policy to hid cell_type, in case it is hidden only for public test set, we can leverage it in a multitask setting
 - graph based feature extraction
@@ -39,5 +42,5 @@ does not require some time dependent forecasting, while the private does.
     - ~~implementation~~
     - tuning
   - convolution
-- consider, by statistical investigation (e.g. Gamma distribution), different objective function
-for LGBM, more generally how the target values do distribute
+- ~~consider, by statistical investigation (e.g. Gamma distribution), different objective function
+for LGBM, more generally how the target values do distribute~~
