@@ -80,7 +80,8 @@ def caching_method(
         assert (saving_function is not None) != (saving_method_ref is not None)
 
         @wraps(fun)
-        def decorated_method(*args, runtime_labelling="", use_cache=True, **kwargs):
+        def decorated_method(*args, runtime_labelling="", read_cache=True, write_cache=True, **kwargs):
+
             file_name = f"{file_label}"
 
             if runtime_labelling:
@@ -116,13 +117,14 @@ def caching_method(
             else:
                 saver = saving_function
 
-            if caching_file.is_file() and use_cache:
+            if caching_file.is_file() and read_cache:
                 logger.info(f" loading from cache {caching_file.name}")
                 return loader(caching_file)
             else:
                 returning_value = fun(*args, **kwargs)
                 logger.info(f"caching {returning_value} from {fun} into {caching_file}")
-                saver(returning_value, caching_file)
+                if write_cache:
+                    saver(returning_value, caching_file)
                 return returning_value
 
         return decorated_method

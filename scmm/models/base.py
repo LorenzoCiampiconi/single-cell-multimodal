@@ -112,7 +112,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
 
         logger.debug(f"{self.model_label} - applying dimensionality reduction")
         X = self.fit_and_apply_dimensionality_reduction(
-            input=X, Y=target_supervised_embedding, runtime_labelling=self.problem_label, use_cache=True
+            input=X, Y=target_supervised_embedding, runtime_labelling=self.problem_label, read_cache=True
         )
         logger.debug(f"{self.model_label} - applying dimensionality reduction - Done")
 
@@ -194,7 +194,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
 
     def predict_public_test(self) -> np.array:
         X_test_reduced = self.apply_dimensionality_reduction(
-            input=self.test_input, runtime_labelling=f"{self.problem_label}_public_test", use_cache=True
+            input=self.test_input, runtime_labelling=f"{self.problem_label}_public_test", read_cache=True
         )
         return self._trained_model.predict(X_test_reduced)
 

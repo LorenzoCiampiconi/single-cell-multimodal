@@ -35,8 +35,8 @@ class Embedder(metaclass=abc.ABCMeta):
         self.fit(input=input, **kwargs)
         logger.info("Embedder has been fit - Done")
 
-        if "use_cache" not in kwargs:
-            kwargs["use_cache"] = False
+        if "read_cache" not in kwargs:
+            kwargs["read_cache"] = False
 
         return self.transform(input=input, **kwargs), self
 
