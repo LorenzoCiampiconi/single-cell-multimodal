@@ -10,13 +10,17 @@ class RidgeSVDMulti(RidgeMixin, TruncateSVDEmbedderInputMixin, MultiomeModelABC)
     ...
 
 
-class SVDinLGBMoutSVDMultiome(
+class RidgeSVDwAutoencoderMulti(RidgeMixin, MultiLevelEmbedderInputMixin, MultiomeModelABC):
+    ...
+
+
+class SVDinLGBMOutSVDMultiome(
     ODRwSVDMixin, MultiOutputRegressorMixin, LGBMMixin, TruncateSVDEmbedderInputMixin, MultiomeModelABC
 ):
     ...
 
 
-class SVDwAutoencoderinLGBMoutSVDMultiome(
+class SVDwAutoencoderInLGBMOutSVDMultiome(
     ODRwSVDMixin, MultiOutputRegressorMixin, LGBMMixin, MultiLevelEmbedderInputMixin, MultiomeModelABC
 ):
     ...

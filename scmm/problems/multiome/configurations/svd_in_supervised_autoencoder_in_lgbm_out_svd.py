@@ -4,10 +4,10 @@ from scmm.models.embedding.autoencoder.full.concrete.multitask import MultiTaskE
 from scmm.models.embedding.svd import TruncatedSVDEmbedder
 from scmm.problems.cite.configurations.utils import check_embedder_params
 from scmm.problems.metrics import common_metrics
-from scmm.problems.multiome.concrete import SVDwAutoencoderinLGBMoutSVDMultiome
+from scmm.problems.multiome.concrete import SVDwAutoencoderInLGBMOutSVDMultiome
 
 model_label = "svd_in_lgbm_out_svd"
-model_class = SVDwAutoencoderinLGBMoutSVDMultiome
+model_class = SVDwAutoencoderInLGBMOutSVDMultiome
 seed = 0
 original_dim = None
 
@@ -46,7 +46,7 @@ dataloader_kwargs = {
 }
 trainer_kwargs = {
     # "accelerator": "gpu",
-    "max_epochs": 1,
+    "max_epochs": 10,
     "check_val_every_n_epoch": 1,
     # "val_check_interval": 1,
     "log_every_n_steps": 50,

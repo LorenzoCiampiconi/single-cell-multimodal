@@ -43,7 +43,7 @@ net_params = {
     "lr": 5e-4,
     "shrinking_factors": (2, 2, 4),
     "activation_function": nn.SELU,
-    "input_coef": 1 / 7,
+    "input_coef": 1 / 4,
     "features_dim": 140,
     # "extra_head"
 }

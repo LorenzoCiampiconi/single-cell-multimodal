@@ -1,8 +1,8 @@
 from scmm.problems.metrics import common_metrics
-from scmm.problems.multiome.concrete import SVDinLGBMoutSVDMultiome
+from scmm.problems.multiome.concrete import SVDinLGBMOutSVDMultiome
 
 model_label = "svd_in_lgbm_out_svd"
-model_class = SVDinLGBMoutSVDMultiome
+model_class = SVDinLGBMOutSVDMultiome
 seed = 0
 original_dim = None
 
