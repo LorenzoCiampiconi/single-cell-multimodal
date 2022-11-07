@@ -5,11 +5,11 @@ import pytorch_lightning as pl
 import torch
 from torch import nn
 
-from scmm.models.embedding.autoencoder.encoder.base import FullyConnectedEncoder
+from scmm.models.embedding.autoencoder.encoder.base_encoder import FullyConnectedEncoder
 from scmm.models.embedding.autoencoder.full.dataset import as_numpy
 from scmm.models.embedding.autoencoder.full.trainers import AutoEncoderTrainer
 from scmm.models.embedding.autoencoder.full.types.basic import BasicAutoEncoder
-from scmm.models.embedding.base import Embedder
+from scmm.models.embedding.base_embedder import Embedder
 
 logger = logging.getLogger(__name__)
 

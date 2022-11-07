@@ -5,7 +5,7 @@ import joblib
 import numpy as np
 from sklearn.decomposition import TruncatedSVD
 
-from scmm.models.embedding.base import Embedder
+from scmm.models.embedding.base_embedder import Embedder
 
 from scmm.utils.caching import caching_method, np_load_wrapper, np_save_wrapper
 

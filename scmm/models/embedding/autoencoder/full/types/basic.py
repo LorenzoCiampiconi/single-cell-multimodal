@@ -6,7 +6,7 @@ import torchmetrics
 from torch import nn
 from torch.optim import lr_scheduler
 
-from scmm.models.embedding.autoencoder.encoder.base import EncoderABC
+from scmm.models.embedding.autoencoder.encoder.base_encoder import EncoderABC
 
 
 class BasicAutoEncoder(pl.LightningModule):

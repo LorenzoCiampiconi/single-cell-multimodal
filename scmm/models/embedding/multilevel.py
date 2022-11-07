@@ -3,7 +3,7 @@ from collections import OrderedDict
 from typing import Any, Dict, List, Tuple, Type
 
 import numpy as np
-from scmm.models.embedding.base import Embedder
+from scmm.models.embedding.base_embedder import Embedder
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +35,6 @@ class MultiLevelEmbedder(Embedder):
         for embedder, init_kwargs in self.embedders_config:
             input, embedder = embedder(**init_kwargs).fit_transform(input=input, **kwargs)
             self._fitted_embedder.append(embedder)
-            # runtime_labelling = kwargs['runtime_labelling']
-            # runtime_labelling += "" #todo
 
         self._fitted = True
 

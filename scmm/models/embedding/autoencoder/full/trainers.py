@@ -12,7 +12,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
 
 from scmm.models.embedding.autoencoder.full.dataset import BaseDataset, IODataset, as_numpy
-from scmm.models.embedding.base import Embedder
+from scmm.models.embedding.base_embedder import Embedder
 from scmm.utils.log import settings
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,14 @@ logger = logging.getLogger(__name__)
 
 class AutoEncoderTrainer(Embedder, metaclass=abc.ABCMeta):
     def __init__(
-        self, *, seed: int, input_dim: int, output_dim: int, model_params: Dict[str, Any], train_params: Dict[str, Any]
+        self,
+        *,
+        seed: int,
+        input_dim: int,
+        output_dim: int,
+        model_params: Dict[str, Any],
+        train_params: Dict[str, Any],
+        save_checkpoints=True,
     ):
         super().__init__(seed=seed, input_dim=input_dim, output_dim=output_dim)
         self.latent_dim = output_dim
@@ -30,8 +37,10 @@ class AutoEncoderTrainer(Embedder, metaclass=abc.ABCMeta):
 
         pl.seed_everything(self.seed, workers=True)
 
+        self._save_checkpoints = save_checkpoints
+
         self.model = self.build_model()
-        self.init_trainer()
+        self.trainer = None
 
     @abc.abstractmethod
     def build_model(self):
@@ -61,7 +70,11 @@ class AutoEncoderTrainer(Embedder, metaclass=abc.ABCMeta):
     def is_fit(self) -> bool:
         return self.fitted
 
-    def init_trainer(self):
+    def init_trainer(self, save_checkpoints=True, **kwargs):
+        callbacks = []
+        if save_checkpoints:
+            callbacks.append(cbs.ModelCheckpoint(save_top_k=-1))
+
         logger = TensorBoardLogger(settings["tensorboard"]["path"], **self.logger_kwargs)
         self.trainer = pl.Trainer(
             deterministic=True,
@@ -75,19 +88,7 @@ class AutoEncoderTrainer(Embedder, metaclass=abc.ABCMeta):
             # detect_anomaly=True,
             # track_grad_norm=2,
             # limit_train_batches=0.5,
-            callbacks=[
-                cbs.ModelCheckpoint(save_top_k=-1),
-                # cbs.LearningRateMonitor("step"),
-                # cbs.StochasticWeightAveraging(
-                #     swa_epoch_start=0.75,
-                #     swa_lrs=5e-3,
-                #     # annealing_epochs=3,
-                # ),
-                # cbs.GPUStatsMonitor(),
-                # cbs.EarlyStopping(),
-                # cbs.RichProgressBar(),
-                # cbs.RichModelSummary(),
-            ],
+            callbacks=callbacks,
             **self.trainer_kwargs,
         )
 
@@ -104,6 +105,7 @@ class AutoEncoderTrainer(Embedder, metaclass=abc.ABCMeta):
         return dsl
 
     def fit(self, *, input: ArrayLike, **kwargs):
+        self.init_trainer(**kwargs)
         dsl = self.build_data_loader(input, shuffle=True)
         self.trainer.fit(self.model, train_dataloaders=dsl)
         self._fitted = True
@@ -150,6 +152,7 @@ class MultiTaskAutoEncoderTrainer(AutoEncoderTrainer, metaclass=abc.ABCMeta):
 
     def fit(self, *, input: ArrayLike, Y=None, **kwargs):
         assert Y is not None
+        self.init_trainer(**kwargs)
         dsl = self.build_data_loader(input, Y=Y, shuffle=True)
         self.trainer.fit(self.model, train_dataloaders=dsl)
         self._fitted = True

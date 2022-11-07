@@ -5,7 +5,7 @@ from copy import deepcopy
 import torch
 from torch import nn
 
-from scmm.models.embedding.autoencoder.decoder.base import FullyConnectedDecoder
+from scmm.models.embedding.autoencoder.decoder.base_decoder import FullyConnectedDecoder
 from scmm.models.embedding.autoencoder.nn import NNEntity, FullyConnectedMixin
 
 logger = logging.getLogger(__name__)

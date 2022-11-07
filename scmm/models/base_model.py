@@ -17,10 +17,19 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     invalid_test_index: int = 7476
     public_test_index: int
 
-    def __init__(self, configuration: Dict[str, Dict[str, Any]], label=""):
+    def __init__(self, configuration: Dict[str, Dict[str, Any]], label="", cv_mod=False):
         self._configuration = configuration
         self._model_label = f"{label}" if label else self.__class__.__name__
-        self._trained_model = None
+        self._estimator = None
+        self._cv_mod = cv_mod
+
+    @staticmethod
+    def now_string() -> str:
+        return datetime.now().strftime("%Y%m%d-%H%M")
+
+    @property
+    def cloning_params(self):
+        return dict(configuration=self.configuration, label=self._model_label)
 
     @property
     def model_label(self):
@@ -28,7 +37,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
 
     @property
     def is_trained(self):
-        return self._trained_model is not None
+        return self._estimator is not None
 
     @property
     @abc.abstractmethod
@@ -54,7 +63,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     def test_input(self) -> sparse.csr_array:
         pass
 
-    def instantiate_model(self, **model_instantiation_kwargs):
+    def instantiate_estimator(self, **model_instantiation_kwargs):
         return self.model_class(**model_instantiation_kwargs)
 
     @property
@@ -82,16 +91,37 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     def embedder_params(self):
         return self.configuration["embedder_params"]
 
+    @property
+    def is_fit(self):
+        return self._estimator is not None and self._is_estimator_fit(self._estimator)
+
+    @abc.abstractmethod
+    def _is_estimator_fit(self, estimator):
+        pass
+
     def fit_and_apply_dimensionality_reduction(self, input, **kwargs):
         return input
 
     def apply_dimensionality_reduction(self, input, **kwargs):
         return input
 
-    def cross_validation(self, X, Y, custom_params=None, **kwargs):
+    def full_cross_validation(self, custom_params=None):
+        model_params = custom_params if custom_params is not None else self.cloning_params
+
+        instantiate_model = lambda: self.__class__(cv_mod=True, **model_params)
+        X, Y = self.train_input, self.train_target
+
+        cv_raw = cross_validate(instantiate_model, X, Y, **self.cv_params)
+        cv_out = self.process_cv_out(cv_raw)
+        return cv_out
+
+    def set_params(self):
+        pass  # todo
+
+    def cross_validation_of_estimator(self, X, Y, custom_params=None, **kwargs):
         # TODO with strategy: {self.cv_params['strategy']}")
         model_params = custom_params if custom_params is not None else self.model_instantiation_kwargs
-        instantiate_model = lambda: self.instantiate_model(**model_params)
+        instantiate_model = lambda: self.instantiate_estimator(**model_params)
         cv_raw = cross_validate(instantiate_model, X, Y, **self.cv_params)
         cv_out = self.process_cv_out(cv_raw)
         return cv_out
@@ -99,13 +129,56 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     def process_cv_out(self, cv_raw):
         return pd.DataFrame(cv_raw)
 
-    def fit_model(self, X, Y, **kwargs):
-        self._trained_model = self.instantiate_model(**self.model_instantiation_kwargs).fit(X, Y, **kwargs)
+    def fit_estimator(self, X, Y, **kwargs):
+        self._estimator = self.instantiate_estimator(**self.model_instantiation_kwargs).fit(X, Y, **kwargs)
 
     def pre_process_target_for_dim_reduction(self, Y):
         return Y
 
-    def full_pipeline(self, refit=True, perform_cross_validation=True):
+    def fit(self, X, Y, fold=None):
+        target_supervised_embedding = self.pre_process_target_for_dim_reduction(Y)
+
+        folding_message = f" - to fold {fold}" if fold is not None else ""
+        logger.debug(f"{self.model_label} - applying dimensionality reduction{folding_message}")
+
+        runtime_labelling = f"{self.problem_label}_{fold}fold" if fold is not None else self.problem_label
+
+        write_cache = read_cache = save_checkpoints = not self._cv_mod
+
+        X = self.fit_and_apply_dimensionality_reduction(
+            input=X,
+            Y=target_supervised_embedding,
+            runtime_labelling=runtime_labelling,
+            read_cache=read_cache,
+            write_cache=write_cache,
+            save_checkpoints=save_checkpoints,
+        )
+        logger.debug(f"{self.model_label} - applying dimensionality reduction {folding_message} - Done")
+
+        logger.info(f"{self.model_label} - fitting estimator{folding_message}")
+        self.fit_estimator(X, Y)
+        logger.info(f"{self.model_label} - fitting estimator{folding_message} - Done")
+
+    def predict(self, X, runtime_labelling=None, **kwargs):
+        assert self.is_fit
+
+        runtime_labelling = (
+            f"{self.problem_label}_{runtime_labelling}" if runtime_labelling is not None else f"{self.problem_label}"
+        )
+
+        write_cache = read_cache = not self._cv_mod
+
+        X_r = self.apply_dimensionality_reduction(
+            input=X, runtime_labelling=runtime_labelling, read_cache=read_cache, write_cache=write_cache
+        )
+        return self._estimator.predict(X_r)
+
+    def fit_and_predict_problem(self):
+        self.fit(self.train_input, self.train_target)
+        Y_hat = self.predict(self.test_input)
+        np.savez(app_static_dir(f"out/{self.problem_label}") / f"{self.model_label}_{self.now_string()}.npz", Y_hat)
+
+    def pipeline_w_fixed_embedding(self, refit=True, perform_cross_validation=True):
         X, Y = self.train_input, self.train_target
 
         target_supervised_embedding = self.pre_process_target_for_dim_reduction(Y)
@@ -117,42 +190,20 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         logger.debug(f"{self.model_label} - applying dimensionality reduction - Done")
 
         logger.info(f"{self.model_label} - performing cross validation")
-        cv_out = self.cross_validation(X, Y)
+        cv_out = self.cross_validation_of_estimator(X, Y)
         logger.info(
             f"{self.model_label} - Average  metrics: " + " | ".join([f"({k})={v:.4}" for k, v in cv_out.mean().items()])
         )
 
         if refit or not perform_cross_validation:
-            self.fit_model(X, Y)
-            Y_test = self.predict_public_test()
-            self.generate_public_test_output(Y_test)
+            self.fit_estimator(X, Y)
+            Y_test = self.predict(self.test_input, runtime_labelling=f"public_test")
+            self.generate_submission_output(Y_test)
 
         return cv_out
 
-    """
-    def tuning(self):
-        params = {"learning_rate": 0.1,
-    "objective": "regression",
-    "metric": "rmse",  # mae',
-    "random_state": 0,
-    "reg_alpha": 0.03,
-    "reg_lambda": 0.002,
-    "colsample_bytree": 0.8,
-    "subsample": 0.6,
-    "max_depth": 10,
-    "num_leaves": 186,
-    "min_child_samples": 263}
-        X, Y = self.train_input, self.train_target
-        logger.debug(f"{self.model_label} - applying dimensionality reduction")
-        X = self.fit_and_apply_dimensionality_reduction(input=X, runtime_labelling=self.problem_label)
-        logger.debug(f"{self.model_label} - applying dimensionality reduction - Done")
-        logger.info(f"{self.model_label} - performing cross validation")
-        cv_out = self.cross_validation(X, Y, custom_params=self.build_model_params_for_tuning(params))
-        logger.info(f"{self.model_label} - Average  metrics: " + " | ".join(
-            [f"({k})={v:.4}" for k, v in cv_out.mean().items()]))
-    """
     def optuna_pipeline(self):
-        study = optuna.create_study(direction='maximize')
+        study = optuna.create_study(direction="maximize")
         study.optimize(self.optuna_objective, n_trials=3)
         print("Number of finished trials:", len(study.trials))
         print("Best trial:", study.best_trial.params)
@@ -180,31 +231,23 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         X = self.fit_and_apply_dimensionality_reduction(input=X, runtime_labelling=self.problem_label)
         logger.debug(f"{self.model_label} - applying dimensionality reduction - Done")
         logger.info(f"{self.model_label} - performing cross validation")
-        cv_out = self.cross_validation(X, Y, custom_params=self.build_model_params_for_tuning(params))
+        cv_out = self.cross_validation_of_estimator(X, Y, custom_params=self.build_model_params_for_tuning(params))
         logger.info(
             f"{self.model_label} - Average  metrics: " + " | ".join([f"({k})={v:.4}" for k, v in cv_out.mean().items()])
         )
 
         vals = [v for k, v in cv_out.mean().items()]
-        #todo mod
+
         return vals[0]
 
     def build_model_params_for_tuning(self, params):
         return params
 
-    def predict_public_test(self) -> np.array:
-        X_test_reduced = self.apply_dimensionality_reduction(
-            input=self.test_input, runtime_labelling=f"{self.problem_label}_public_test", read_cache=True
-        )
-        return self._trained_model.predict(X_test_reduced)
-
-    def generate_public_test_output(self, test_output: np.array):
+    def generate_submission_output(self, test_output: np.array):
         # test_output[:self.invalid_test_index] = 0
         submission = pd.read_csv(app_static_dir("data") / "sample_submission.csv", index_col="row_id").squeeze(
             "columns"
         )
         submission.iloc[self.public_test_index : len(test_output.ravel())] = test_output.ravel()
         assert not submission.isna().any()
-        submission.to_csv(
-            app_static_dir("out") / f"{self.model_label}_{datetime.now().strftime('%Y%m%d-%H%M')}_submission.csv"
-        )
+        submission.to_csv(app_static_dir("out") / f"{self.model_label}_{self.now_string()}_submission.csv")

@@ -3,7 +3,7 @@ from typing import Type
 
 from sklearn.base import BaseEstimator
 
-from scmm.models.embedding.base import Embedder
+from scmm.models.embedding.base_embedder import Embedder
 from scmm.models.embedding.svd import TruncatedSVDEmbedder
 
 
@@ -78,15 +78,15 @@ class ODRModelWrappedMixin(metaclass=abc.ABCMeta):
         if self.configuration["odr_params"]["odr_also_on_target_for_input_dim_reduction"]:
             if model_kwargs is None:
                 model_kwargs = self.model_instantiation_kwargs
-            odr_obj: OutputDimensionalityReducedModelWrapper = self.instantiate_model(**model_kwargs)
+            odr_obj: OutputDimensionalityReducedModelWrapper = self.instantiate_estimator(**model_kwargs)
             Y_r = odr_obj.transform_label(Y)
             return Y_r
         else:
             return Y
 
-    def instantiate_model(self, **model_instantiation_kwargs):
+    def instantiate_estimator(self, **model_instantiation_kwargs):
         return OutputDimensionalityReducedModelWrapper(
-            wrapped_model=super().instantiate_model(**model_instantiation_kwargs),
+            wrapped_model=super().instantiate_estimator(**model_instantiation_kwargs),
             embedder_class=self.odr_embedder_class,
             embedder_params=self.odr_embedder_params,
         )

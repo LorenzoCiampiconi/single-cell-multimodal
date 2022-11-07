@@ -9,9 +9,9 @@ from scmm.models.embedding.autoencoder.decoder.two_head import JointDecoder
 from scmm.models.embedding.autoencoder.full.types.multitask_encoder import MultiTaskEncoder
 
 from scmm.models.embedding.autoencoder.full.dataset import as_numpy
-from scmm.models.embedding.autoencoder.encoder.base import FullyConnectedEncoder
+from scmm.models.embedding.autoencoder.encoder.base_encoder import FullyConnectedEncoder
 from scmm.models.embedding.autoencoder.full.trainers import MultiTaskAutoEncoderTrainer
-from scmm.models.embedding.base import Embedder
+from scmm.models.embedding.base_embedder import Embedder
 
 
 logger = logging.getLogger(__name__)

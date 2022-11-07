@@ -4,7 +4,7 @@ from typing import Dict, Type
 from sklearn.multioutput import MultiOutputRegressor
 
 
-class MultiModelWrapperMixin(metaclass=abc.ABCMeta):
+class MultiOutputEstimatorWrapperMixin(metaclass=abc.ABCMeta):
     model_params: Dict
     model_class: Type
 
@@ -13,7 +13,7 @@ class MultiModelWrapperMixin(metaclass=abc.ABCMeta):
     def model_wrapper_class(self):
         pass
 
-    def instantiate_model(self, **model_instantiation_kwargs):
+    def instantiate_estimator(self, **model_instantiation_kwargs):
         return self.model_wrapper_class(**model_instantiation_kwargs)
 
     @property
@@ -24,7 +24,10 @@ class MultiModelWrapperMixin(metaclass=abc.ABCMeta):
         return {"estimator": self.model_class(**params)}
 
 
-class MultiOutputRegressorMixin(MultiModelWrapperMixin):
+class MultiOutputRegressorMixin(MultiOutputEstimatorWrapperMixin):
     @property
     def model_wrapper_class(self):
         return MultiOutputRegressor
+
+    def _is_estimator_fit(self, estimator):
+        return True  # todo

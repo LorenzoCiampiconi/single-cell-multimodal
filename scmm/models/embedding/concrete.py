@@ -1,5 +1,5 @@
 from typing import Type
-from scmm.models.embedding.base import Embedder, EmbedderWrapperInputMixin
+from scmm.models.embedding.base_embedder import Embedder, EmbedderWrapperInputMixin
 from scmm.models.embedding.multilevel import MultiLevelEmbedder
 from scmm.models.embedding.svd import TruncatedSVDEmbedder
 
