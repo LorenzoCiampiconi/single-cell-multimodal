@@ -122,8 +122,8 @@ def caching_method(
                 return loader(caching_file)
             else:
                 returning_value = fun(*args, **kwargs)
-                logger.info(f"caching {returning_value} from {fun} into {caching_file}")
                 if write_cache:
+                    logger.info(f"caching {returning_value} from {fun} into {caching_file}")
                     saver(returning_value, caching_file)
                 return returning_value
 

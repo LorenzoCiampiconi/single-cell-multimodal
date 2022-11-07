@@ -14,12 +14,12 @@ model_params = {
 
 cv_params = {"cv": 3, "scoring": common_metrics, "verbose": 10}
 
-svd_params = {"output_dimensionality": 4096}
+svd_params = {"output_dimensionality": 64}
 
 embedder_params = {
     "seed": seed,
     "input_dim": original_dim,
-    "output_dim": 4096,
+    "output_dim": 64,
 }
 
 configuration = {

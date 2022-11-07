@@ -41,4 +41,4 @@ if __name__ == "__main__":
     model_wrapper = LGBMwMultilevelEmbedderCite(
         configuration=config_module.configuration, label=config_module.model_label
     )
-    model_wrapper.full_pipeline()
+    model_wrapper.pipeline_w_fixed_embedding()

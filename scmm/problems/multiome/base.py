@@ -5,7 +5,7 @@ import numpy as np
 from scipy import sparse
 
 from scmm.utils.data_handling import load_sparse
-from scmm.models.base import SCMModelABC
+from scmm.models.base_model import SCMModelABC
 
 logger = logging.getLogger(__name__)
 

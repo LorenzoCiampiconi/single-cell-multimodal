@@ -42,4 +42,4 @@ if __name__ == "__main__":
     model_class = config_module.model_class
 
     model_wrapper = model_class(configuration=configuration, label=config_module.model_label)
-    model_wrapper.full_pipeline(refit=False)
+    model_wrapper.pipeline_w_fixed_embedding(True)

@@ -61,7 +61,7 @@ def submission(cite: str, multiome: str):
         else:
             model = load_model(problem, name, configs)
             logger.info(f"starting full pipeline for problem with configuration: {model.model_label}")
-            output = model.full_pipeline(refit=True)
+            output = model.pipeline_w_fixed_embedding(refit=True)
         return output
 
     subs = []
