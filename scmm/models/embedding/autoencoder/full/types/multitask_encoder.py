@@ -36,7 +36,7 @@ class MultiTaskEncoder(BasicAutoEncoder):
         y_hat, feat_hat = self.decoder(z)
 
         input_loss = self.recon_loss(y_hat, y)
-        feat_loss = self.recon_feat_loss(feat_hat, feat)
+        feat_loss = torch.log1p(self.recon_feat_loss(feat_hat, feat))
 
         return (z, y_hat), (input_loss, feat_loss)
 
