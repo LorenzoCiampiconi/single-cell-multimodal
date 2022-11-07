@@ -17,8 +17,8 @@ from scmm.utils.data_handling import load_sparse
 from scmm.models.embedding.autoencoder.full.types import AutoEncoder
 
 from scmm.models.embedding.autoencoder.full.dataset import BaseDataset, as_numpy
-from scmm.models.embedding.autoencoder.decoder.base import FullyConnectedDecoder
-from scmm.models.embedding.autoencoder.encoder.base import FullyConnectedEncoder
+from scmm.models.embedding.autoencoder.decoder.base_decoder import FullyConnectedDecoder
+from scmm.models.embedding.autoencoder.encoder.base_encoder import FullyConnectedEncoder
 from scmm.utils.appdirs import app_static_dir
 from scmm.utils.log import settings, setup_logging
 
