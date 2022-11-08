@@ -63,6 +63,10 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     def test_input(self) -> sparse.csr_array:
         pass
 
+    @property
+    def test_input_idx(self):
+        pass
+
     def instantiate_estimator(self, **model_instantiation_kwargs):
         return self.model_class(**model_instantiation_kwargs)
 
@@ -198,7 +202,8 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         if refit or not perform_cross_validation:
             self.fit_estimator(X, Y)
             Y_test = self.predict(self.test_input, runtime_labelling=f"public_test")
-            self.generate_submission_output(Y_test)
+            out = self.generate_submission_output(Y_test)
+            self.save_public_test_output(out)
 
         return cv_out
 
@@ -243,11 +248,17 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     def build_model_params_for_tuning(self, params):
         return params
 
-    def generate_submission_output(self, test_output: np.array):
-        # test_output[:self.invalid_test_index] = 0
-        submission = pd.read_csv(app_static_dir("data") / "sample_submission.csv", index_col="row_id").squeeze(
-            "columns"
+    def predict_public_test(self) -> np.array:
+        X_test_reduced = self.apply_dimensionality_reduction(
+            input=self.test_input, runtime_labelling=f"{self.problem_label}_public_test", read_cache=True
         )
-        submission.iloc[self.public_test_index : len(test_output.ravel())] = test_output.ravel()
-        assert not submission.isna().any()
-        submission.to_csv(app_static_dir("out") / f"{self.model_label}_{self.now_string()}_submission.csv")
+        return self._trained_model.predict(X_test_reduced)
+
+    @abc.abstractmethod
+    def generate_submission_output(self, test_output: np.array):
+        pass
+
+    def save_public_test_output(self, output: pd.DataFrame):
+        output.to_csv(
+            app_static_dir("out") / f"{self.model_label}_{datetime.now().strftime('%Y%m%d-%H%M')}_submission.csv"
+        )

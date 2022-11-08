@@ -1,8 +1,10 @@
 import abc
 import logging
 
+import pandas as pd
 import numpy as np
 from scipy import sparse
+from scmm.utils.appdirs import app_static_dir
 
 from scmm.utils.data_handling import load_sparse
 from scmm.models.base_model import SCMModelABC
@@ -44,3 +46,35 @@ class MultiomeModelABC(SCMModelABC, metaclass=abc.ABCMeta):
             logger.info(f"{self.model_label} is loading test input from MULTIOME dataset")
             self._test_input = load_sparse(split="test", problem="multi", type="inputs")
         return self._test_input
+
+    @property
+    def test_input_idx(self):
+        if self._test_input_idx is None:
+            # cols from target
+            path = app_static_dir("data") / f"test_multi_inputs_idxcol.npz"
+            with np.load(path, allow_pickle=True) as npz_file:
+                index = npz_file["index"]
+            # row from test
+            path = app_static_dir("data") / f"train_multi_targets_idxcol.npz"
+            with np.load(path, allow_pickle=True) as npz_file:
+                columns = npz_file["columns"]
+
+            self._test_input_idx = (index, columns)
+
+        return self._test_input_idx
+
+    def generate_submission_output(self, test_output: np.array):
+        index, columns = self.test_input_idx
+        df = pd.DataFrame(test_output, index=index, columns=columns)
+        df.index.name = "cell_id"
+        df.columns.name = "gene_id"
+        eval_ids = pd.read_csv(app_static_dir("data") / "evaluation_ids.csv").set_index(["cell_type", "gene_id"])
+
+        s = df.stack()
+        s.name = "target"
+        out = eval_ids.join(df, on=["cell_id", "gene_id"])
+        out = out[["row_id", "target"]].set_index("target")
+
+        assert not out.isna().any()
+
+        return out
