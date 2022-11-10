@@ -12,11 +12,12 @@ todo: temporary main to be refactored
        else check if the configuration name is a file on the config folder
     4) run the pipline with the proper config or rise an error
 """
-3
+
 import argparse
 import importlib
 import logging
 
+from scmm.models.base_model import SCMModelABC
 from scmm.problems.multiome.configurations import config_dict
 from scmm.utils.log import setup_logging
 
@@ -26,7 +27,7 @@ if __name__ == "__main__":
     logger = logging.getLogger(__name__)
 
     # argparse setup
-    parser = argparse.ArgumentParser(description="scmm full pipline for multiome problem, specifying a configuration")
+    parser = argparse.ArgumentParser(description="scmm full pipeline for multiome problem, specifying a configuration")
     parser.add_argument("config_name", type=str, help="configuration name or configuration file name")
     args = parser.parse_args()
 
@@ -41,5 +42,5 @@ if __name__ == "__main__":
     configuration = config_module.configuration
     model_class = config_module.model_class
 
-    model_wrapper = model_class(configuration=configuration, label=config_module.model_label)
-    model_wrapper.pipeline_w_fixed_embedding(True)
+    model_wrapper: SCMModelABC = model_class(configuration=configuration, label=config_module.model_label)
+    model_wrapper.full_cross_validation()

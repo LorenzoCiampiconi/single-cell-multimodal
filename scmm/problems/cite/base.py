@@ -71,7 +71,7 @@ class CiteModelABC(SCMModelABC, metaclass=abc.ABCMeta):
         # eval_ids = pd.read_csv(app_static_dir("data") / "evaluation_ids.csv", index_col="row_id")
 
         out = pd.Series(test_output.ravel(), name="target").to_frame()
-        out["target"].iloc[self.public_test_index:self.invalid_test_index] = 0
+        out["target"].iloc[self.public_test_index : self.invalid_test_index] = 0
         out.index.name = "row_id"
         out = out.squeeze()
 

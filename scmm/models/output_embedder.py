@@ -74,8 +74,16 @@ class ODRModelWrappedMixin(metaclass=abc.ABCMeta):
     def odr_embedder_class(self):
         pass
 
+    @property
+    def perform_odr_also_on_target_for_input_dim_reduction(self):
+        return (
+                "odr_params" in self.configuration
+                and "odr_also_on_target_for_input_dim_reduction" in self.configuration["odr_params"]
+                and self.configuration["odr_params"]["odr_also_on_target_for_input_dim_reduction"]
+        )
+
     def pre_process_target_for_dim_reduction(self, Y, model_kwargs=None):
-        if self.configuration["odr_params"]["odr_also_on_target_for_input_dim_reduction"]:
+        if self.perform_odr_also_on_target_for_input_dim_reduction:
             if model_kwargs is None:
                 model_kwargs = self.model_instantiation_kwargs
             odr_obj: OutputDimensionalityReducedModelWrapper = self.instantiate_estimator(**model_kwargs)
