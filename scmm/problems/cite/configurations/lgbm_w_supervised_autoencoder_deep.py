@@ -1,6 +1,8 @@
 from scmm.models.embedding.autoencoder.full.concrete.multitask import MultiTaskEncoderEmbedder
 from scmm.models.embedding.svd import TruncatedSVDEmbedder
 from scmm.problems.cite.concrete import LGBMwMultilevelEmbedderCite
+from scmm.problems.cite.configurations.common_conf import standard_lgbm_cite_conf, cv_params
+from scmm.problems.cite.configurations.utils import check_nn_embedder_params
 from scmm.problems.metrics import common_metrics
 from torch import nn
 
@@ -8,25 +10,12 @@ model_class = LGBMwMultilevelEmbedderCite
 seed = 0
 original_dim = None
 
-model_params = {
-    "learning_rate": 0.1,
-    "objective": "regression",
-    "metric": "rmse",  # mae',
-    "random_state": 0,
-    "reg_alpha": 0.03,
-    "reg_lambda": 0.002,
-    "colsample_bytree": 0.8,
-    "subsample": 0.6,
-    "max_depth": 10,
-    "num_leaves": 186,
-    "min_child_samples": 263,
-}
-
-cv_params = {"cv": 3, "scoring": common_metrics, "verbose": 10}
+model_params = standard_lgbm_cite_conf
 
 logger_kwargs = {
     "name": "supervised_autoencoder_cite",
 }
+
 dataloader_kwargs = {
     "batch_size": 128,
     "num_workers": 4,
@@ -81,17 +70,7 @@ embedder_params = {
     ],
 }
 
-for embedder_config in embedder_params["embedders_config"]:
-    if "model_params" in embedder_config[1] and "shrinking_factors" in embedder_config[1]["model_params"]:
-        input_dim = embedder_config[1]["input_dim"]
-        output_dim = embedder_config[1]["output_dim"]
-
-        final_dim = input_dim
-        for factor in embedder_config[1]["model_params"]["shrinking_factors"]:
-            final_dim = final_dim // factor
-
-        assert final_dim == output_dim
-
+check_nn_embedder_params(embedder_params)
 
 configuration = {
     "cv_params": cv_params,
