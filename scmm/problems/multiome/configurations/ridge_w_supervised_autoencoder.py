@@ -2,6 +2,7 @@ from scmm.models.embedding.autoencoder import BasicAutoEncoderEmbedder
 from scmm.models.embedding.svd import TruncatedSVDEmbedder
 from scmm.problems.metrics import common_metrics
 from torch import nn
+import torchmetrics
 
 model_label = "lgbm_w_deep_autoencoder"
 seed = 0
@@ -31,6 +32,8 @@ net_params = {
     "lr": 1e-3,
     "shrinking_factors": (2, 2, 2, 2),
     "activation_function": nn.SELU,
+    "loss": nn.SmoothL1Loss(),
+    "feat_loss": torchmetrics.PearsonCorrCoef(num_outputs=#TODO),
 }
 
 svd_out_dim = 2048

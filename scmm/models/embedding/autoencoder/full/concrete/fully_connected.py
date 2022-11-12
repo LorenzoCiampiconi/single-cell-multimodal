@@ -55,7 +55,7 @@ class BasicAutoEncoderEmbedder(AutoEncoderTrainer, Embedder):
                 fully_connected_sequential=encoder_sequential,
             )
 
-        return self.autoencoder_class(lr=lr, encoder=encoder, decoder=decoder)
+        return self.autoencoder_class(lr=lr, encoder=encoder, decoder=decoder, loss=self.model_params["loss"])
 
     def _predict(self, ds):
         out = self.trainer.predict(self.model, ds)

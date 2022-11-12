@@ -1,10 +1,14 @@
-from scmm.models.embedding.autoencoder.full.concrete.multitask import MultiTaskEncoderEmbedder
+import torchmetrics
+from torch import nn
+
+from scmm.models.embedding.autoencoder.full.concrete.multitask import \
+    MultiTaskEncoderEmbedder
 from scmm.models.embedding.svd import TruncatedSVDEmbedder
 from scmm.problems.cite.concrete import LGBMwMultilevelEmbedderCite
-from scmm.problems.cite.configurations.common_conf import standard_lgbm_cite_conf, cv_params
+from scmm.problems.cite.configurations.common_conf import (
+    cv_params, standard_lgbm_cite_conf)
 from scmm.problems.cite.configurations.utils import check_nn_embedder_params
 from scmm.problems.metrics import common_metrics
-from torch import nn
 
 model_class = LGBMwMultilevelEmbedderCite
 seed = 0
@@ -34,6 +38,8 @@ net_params = {
     "activation_function": nn.SELU,
     "input_coef": 1 / 10,
     "features_dim": 140,
+    "loss": nn.SmoothL1Loss(),
+    "feat_loss": torchmetrics.PearsonCorrCoef(num_outputs=140),
     # "extra_head"
 }
 

@@ -10,14 +10,14 @@ from scmm.models.embedding.autoencoder.encoder.base_encoder import EncoderABC
 
 
 class BasicAutoEncoder(pl.LightningModule):
-    def __init__(self, *, lr: float, encoder: EncoderABC, decoder: Optional[nn.Module] = None):
+    def __init__(self, *, lr: float, encoder: EncoderABC, loss: nn.Module, decoder: Optional[nn.Module] = None):
         super().__init__()
         self.encoder = encoder
 
         self.decoder = decoder if decoder is not None else encoder.mirror_sequential_for_decoding()
         self.lr = lr
 
-        self.recon_loss = nn.SmoothL1Loss(beta=2e-1)
+        self.recon_loss = loss # nn.SmoothL1Loss(beta=2e-1)
         self.recon_metrics = torchmetrics.MetricCollection(
             [
                 torchmetrics.MeanSquaredError(),
@@ -26,7 +26,12 @@ class BasicAutoEncoder(pl.LightningModule):
             ],
             prefix="recon_loss/val",
         )
-        self.save_hyperparameters(ignore=["encoder", "decoder"])
+
+        self.save_filtered_hyperparameters()
+
+    def save_filtered_hyperparameters(self):
+        self.ignored_hparams = ["encoder", "decoder", "loss"]
+        self.save_hyperparameters(ignore=self.ignored_hparams)
 
     def on_fit_start(self):
         self.recon_metrics = self.recon_metrics.cpu()

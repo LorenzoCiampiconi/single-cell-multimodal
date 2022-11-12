@@ -35,6 +35,7 @@ standard_autoencoder_net_params = {
     "lr": 1e-3,
     "shrinking_factors": (4, 4, 2),
     "activation_function": nn.SELU,
+    "loss": nn.SmoothL1Loss(),
 }
 
 cv_params = {"cv": 3, "scoring": common_metrics, "verbose": 10}

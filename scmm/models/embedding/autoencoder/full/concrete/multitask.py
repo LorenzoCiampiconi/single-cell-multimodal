@@ -73,7 +73,14 @@ class MultiTaskEncoderEmbedder(MultiTaskAutoEncoderTrainer, Embedder):
             head=head,
         )
 
-        return self.autoencoder_class(lr=lr, input_coef=input_coef, encoder=encoder, decoder=decoder)
+        return self.autoencoder_class(
+            lr=lr,
+            input_coef=input_coef,
+            encoder=encoder,
+            decoder=decoder,
+            loss=self.model_params["loss"],
+            feat_loss=self.model_params["feat_loss"],
+        )
 
     def _predict(self, ds):
         out, extra = self.trainer.predict(self.model, ds)  # TODO broken? use extra

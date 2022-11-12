@@ -1,6 +1,8 @@
+import torchmetrics
 from torch import nn
 
-from scmm.models.embedding.autoencoder.full.concrete.multitask import MultiTaskEncoderEmbedder
+from scmm.models.embedding.autoencoder.full.concrete.multitask import \
+    MultiTaskEncoderEmbedder
 from scmm.models.embedding.svd import TruncatedSVDEmbedder
 from scmm.problems.cite.configurations.utils import check_nn_embedder_params
 from scmm.problems.metrics import common_metrics
@@ -58,6 +60,8 @@ net_params = {
     "activation_function": nn.SELU,
     "input_coef": 1 / 7,
     "features_dim": output_reduced_dim,
+    "loss": nn.SmoothL1Loss(),
+    "feat_loss": torchmetrics.PearsonCorrCoef(num_outputs=#TODO),
     # "extra_head"
 }
 

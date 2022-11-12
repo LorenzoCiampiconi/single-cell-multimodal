@@ -25,6 +25,7 @@ net_params = {
     "lr": 1e-3,
     "shrinking_factors": (2, 2, 2, 2),
     "activation_function": nn.SELU,
+    "loss": nn.SmoothL1Loss(),
 }
 
 svd_out_dim = 2048

@@ -29,6 +29,7 @@ net_params = {
     "lr": 1e-3,
     "shrinking_factors": (4, 2),
     "activation_function": nn.SELU,
+    "loss": nn.SmoothL1Loss(),
 }
 
 embedder_params = {
