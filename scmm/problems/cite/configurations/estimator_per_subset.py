@@ -13,7 +13,7 @@ model_class = EnsembleSplitTargetSVDCite
 model_label = "ensemble_split_target_cite"
 seed = 0
 
-common_level_svd_output_dim = 64
+common_level_svd_output_dim = 2048
 
 embedder_params = {
     "seed": seed,
@@ -26,8 +26,8 @@ group_1 = df_split[df_split.group == 0]["target_id"].values
 group_2 = df_split[df_split.group == 1]["target_id"].values
 
 subsets_mapping = {
-    tuple(group_1): {"configuration": deepcopy(configuration), "model_class": sub_model_class},
-    tuple(group_2): {
+    tuple(range(0,70)): {"configuration": deepcopy(configuration), "model_class": sub_model_class},
+    tuple(range(70,140)): {
         "configuration": deepcopy(configuration),
         "model_class": sub_model_class,
     },

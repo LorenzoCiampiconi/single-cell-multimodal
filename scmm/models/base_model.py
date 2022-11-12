@@ -65,7 +65,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
     def test_input(self) -> sparse.csr_array:
-        return self._train_target
+        return self._test_input
 
     @property
     def test_input_idx(self):

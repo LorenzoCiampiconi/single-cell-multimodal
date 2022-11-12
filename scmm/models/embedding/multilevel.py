@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Tuple, Type
 
 import numpy as np
 from scmm.models.embedding.base_embedder import Embedder
+from scmm.models.embedding.svd import TruncatedSVDEmbedder
 
 logger = logging.getLogger(__name__)
 

@@ -17,6 +17,7 @@ import argparse
 import importlib
 import logging
 
+from scmm.models.base_model import SCMModelABC
 from scmm.problems.cite.configurations import config_dict
 from scmm.utils.log import setup_logging
 
@@ -41,9 +42,6 @@ if __name__ == "__main__":
     configuration = config_module.configuration
     model_class = config_module.model_class
 
-    model_wrapper = model_class(configuration=configuration, label=config_module.model_label)
+    model_wrapper:SCMModelABC = model_class(configuration=configuration, label=config_module.model_label)
 
-    model_wrapper.fit(model_wrapper.train_input, model_wrapper.train_target)
-    Y_test = model_wrapper.predict(model_wrapper.test_input)
-    out = model_wrapper.generate_submission_output(Y_test)
-    model_wrapper.save_public_test_output(out)
+    model_wrapper.full_cross_validation()

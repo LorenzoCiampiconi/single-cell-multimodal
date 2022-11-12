@@ -26,7 +26,7 @@ dataloader_kwargs = {
 }
 trainer_kwargs = {
     # "accelerator": "gpu",
-    "max_epochs": 10,
+    "max_epochs": 30,
     "check_val_every_n_epoch": 1,
     # "val_check_interval": 1,
     "log_every_n_steps": 50,
@@ -65,7 +65,7 @@ embedder_params = {
                 "seed": seed,
                 "input_dim": svd_out_dim,
                 "output_dim": latent_dim,
-                "estimator_params": net_params,
+                "model_params": net_params,
                 "train_params": {
                     "logger_kwargs": logger_kwargs,
                     "dataloader_kwargs": dataloader_kwargs,
