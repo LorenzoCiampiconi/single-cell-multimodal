@@ -16,7 +16,7 @@ embedder_params = {
 
 configuration = {
     "cv_params": cv_params,
-    "model_params": standard_lgbm_cite_conf,
+    "estimator_params": standard_lgbm_cite_conf,
     "embedder_params": embedder_params,
     "seed": seed,
 }

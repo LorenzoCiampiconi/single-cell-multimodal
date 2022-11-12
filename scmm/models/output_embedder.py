@@ -60,7 +60,7 @@ class ODRModelWrappedMixin(metaclass=abc.ABCMeta):
     """
 
     model_class: Type
-    model_params: dict
+    estimator_params: dict
     model_instantiation_kwargs: dict
     odr_embedder_class: Type[Embedder]
     configuration: dict

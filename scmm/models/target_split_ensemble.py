@@ -21,19 +21,10 @@ class SCMModelTargetSubsetMixin:
         return self._target_column_subset
 
 
-class SCMModelEnsembleTargetSubset(SCMModelABC, metaclass=abc.ABCMeta):
-    @property
-    def estimator_class(self):
-        logger.warning("you are trying to retrieve the class of estimator of an ensemble, which can be of multiple type, something is wrong!")
-        return None
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        assert (
-            "subsets_mapping" in self.configuration
-        ), "no subset mappings found in the passed configuration, this ensemble cannot be instantiated"
-
-        self._subsets_mapping: dict = self.configuration["subsets_mapping"]
+class EnsembleTargetSubsetWSCMMModelEstimator(metaclass=abc.ABCMeta):
+    def __init__(self, *, subset_mapping:dict, output_dim):
+        self._subsets_mapping = subset_mapping
+        self._output_dim = output_dim
 
         for subset, model_definition in self._subsets_mapping.items():
             assert "model_class" in model_definition, f"no model class specified for subset {subset}"
@@ -47,6 +38,14 @@ class SCMModelEnsembleTargetSubset(SCMModelABC, metaclass=abc.ABCMeta):
     def _extend_model_w_target_subset_mixin(model_class: Type[SCMModelABC]):
         return type(f"{model_class}Subset", (SCMModelTargetSubsetMixin, model_class), {})
 
+    @property
+    def set_all_targets(self):
+        all_targets = []
+        for model in self._subset_models.values():
+            all_targets += model.target_column_subset
+
+        return set(all_targets)
+
     def _instantiate_subset_models(self) -> None:
         subset_models = dict()
 
@@ -59,18 +58,13 @@ class SCMModelEnsembleTargetSubset(SCMModelABC, metaclass=abc.ABCMeta):
 
         self._subset_models = subset_models
 
-        assert all(m.problem_label == self.problem_label for m in subset_models.values())
-
-        all_targets = []
-        for model in self._subset_models.values():
-            all_targets += model.target_column_subset
-
-        assert len(set(all_targets)) == self.train_target.shape[1]
+        assert len(self.set_all_targets) == self._output_dim
 
     @property
     def is_instantiated(self):
         return self._subset_models is not None and all(model.is_instantiated for model in self._subset_models.values())
 
+    @property
     def is_fit(self):
         return self.is_instantiated and all(model.is_fit for model in self._subset_models.values())
 
@@ -80,37 +74,32 @@ class SCMModelEnsembleTargetSubset(SCMModelABC, metaclass=abc.ABCMeta):
 
         self._instantiate_subset_models()
 
-    def fit_estimator(self, X, Y, **kwargs):
-        self._instantiate_subset_models()
+    def fit(self, X, Y, **kwargs):
+        if not self.is_instantiated:
+            self._instantiate_subset_models()
 
         for estimator in self._subset_models.values():
             estimator: type[SCMModelTargetSubsetMixin, SCMModelABC]
             estimator.fit(X, Y[:, estimator.target_column_subset], **kwargs)
 
-    def predict(self, X, runtime_labelling=None, **kwargs):
+        return self
+
+    def predict(self, X, **kwargs):
         assert self.is_fit
 
-        runtime_labelling = (
-            f"{self.problem_label}_{runtime_labelling}" if runtime_labelling is not None else f"{self.problem_label}"
-        )
-
-        write_cache = read_cache = not self._cv_mod
-
-        X_r = self.apply_dimensionality_reduction(
-            input=X, runtime_labelling=runtime_labelling, read_cache=read_cache, write_cache=write_cache
-        )
-
-        output = np.zeros((X_r.shape[0], self.train_target.shape[1]))
+        output = np.zeros((X.shape[0], self._output_dim))
 
         for estimator in self._subset_models.values():
             estimator: type[SCMModelTargetSubsetMixin, SCMModelABC]
-            output[:, estimator.target_column_subset] = estimator.predict(X_r)
-            # todo add merge by mean
+            output[:, estimator.target_column_subset] = estimator.predict(X, **kwargs)
 
         return output
 
-    def save_public_test_output(self, output: pd.DataFrame):
-        super().save_public_test_output(output)
+
+class EnsembleTargetSubsetWSCMMModelEstimatorMixin:
+    @property
+    def estimator_class(self):
+        return EnsembleTargetSubsetWSCMMModelEstimator
 
     def _is_estimator_fit(self, estimator):
-        return True
+        return estimator.is_fit

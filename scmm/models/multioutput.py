@@ -5,7 +5,7 @@ from sklearn.multioutput import MultiOutputRegressor
 
 
 class MultiOutputEstimatorWrapperMixin(metaclass=abc.ABCMeta):
-    model_params: Dict
+    estimator_params: Dict
     model_class: Type
 
     @property
@@ -18,9 +18,9 @@ class MultiOutputEstimatorWrapperMixin(metaclass=abc.ABCMeta):
 
     @property
     def model_instantiation_kwargs(self):
-        return {"estimator": self.estimator_class(**self.model_params)}
+        return {"estimator": self.estimator_class(**self.estimator_params)}
 
-    def build_model_params_for_tuning(self, params):
+    def build_estimator_params_for_tuning(self, params):
         return {"estimator": self.estimator_class(**params)}
 
 

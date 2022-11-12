@@ -7,7 +7,7 @@ model_label = "lgbm_w_deep_autoencoder"
 seed = 0
 original_dim = None
 
-model_params = {"copy_X": False}
+estimator_params = {"copy_X": False}
 
 
 cv_params = {"cv": 3, "scoring": common_metrics, "verbose": 10}
@@ -80,7 +80,7 @@ for embedder_config in embedder_params["embedders_config"]:
 
 configuration = {
     "cv_params": cv_params,
-    "model_params": model_params,
+    "estimator_params": estimator_params,
     "embedder_params": embedder_params,
     "seed": seed,
 }

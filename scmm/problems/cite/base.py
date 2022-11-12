@@ -5,7 +5,6 @@ import pandas as pd
 import numpy as np
 from scipy import sparse
 
-from scmm.models.target_split_ensemble import SCMModelEnsembleTargetSubset
 from scmm.utils.appdirs import app_static_dir
 
 from scmm.utils.data_handling import load_sparse
@@ -79,6 +78,3 @@ class CiteModelMixin:
 class CiteModelABC(CiteModelMixin,SCMModelABC, metaclass=abc.ABCMeta):
     pass
 
-
-class CiteModelEnsembleTargetSubsetABC(CiteModelMixin, SCMModelEnsembleTargetSubset, metaclass=abc.ABCMeta):
-    pass

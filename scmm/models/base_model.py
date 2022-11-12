@@ -72,8 +72,8 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         pass
 
     @property
-    def model_params(self):
-        return self.configuration["model_params"] # todo refactor in "estimator params"
+    def estimator_params(self):
+        return self.configuration["estimator_params"] # todo refactor in "estimator params"
 
     @property
     @abc.abstractmethod
@@ -94,7 +94,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
 
     @property
     def model_instantiation_kwargs(self):
-        return self.model_params
+        return self.estimator_params
 
     def instantiate_estimator(self, **model_instantiation_kwargs):
         return self.estimator_class(**model_instantiation_kwargs)
@@ -114,9 +114,9 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         return input
 
     def full_cross_validation(self, custom_params=None):
-        model_params = custom_params if custom_params is not None else self.cloning_params
+        estimator_params = custom_params if custom_params is not None else self.cloning_params
 
-        instantiate_model = lambda: self.__class__(cv_mod=True, **model_params)
+        instantiate_model = lambda: self.__class__(cv_mod=True, **estimator_params)
         X, Y = self.train_input, self.train_target
 
         cv_raw = cross_validate(instantiate_model, X, Y, **self.cv_params)
@@ -124,8 +124,8 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         return cv_out
 
     def cross_validation_of_estimator(self, X, Y, custom_params=None, **kwargs):
-        model_params = custom_params if custom_params is not None else self.model_instantiation_kwargs
-        instantiate_model = lambda: self.instantiate_estimator(**model_params)
+        estimator_params = custom_params if custom_params is not None else self.model_instantiation_kwargs
+        instantiate_model = lambda: self.instantiate_estimator(**estimator_params)
         cv_raw = cross_validate(instantiate_model, X, Y, **self.cv_params)
         cv_out = self.process_cv_out(cv_raw)
         return cv_out
@@ -236,7 +236,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         X = self.fit_and_apply_dimensionality_reduction(input=X, runtime_labelling=self.problem_label)
         logger.debug(f"{self.model_label} - applying dimensionality reduction - Done")
         logger.info(f"{self.model_label} - performing cross validation")
-        cv_out = self.cross_validation_of_estimator(X, Y, custom_params=self.build_model_params_for_tuning(params))
+        cv_out = self.cross_validation_of_estimator(X, Y, custom_params=self.build_estimator_params_for_tuning(params))
         logger.info(
             f"{self.model_label} - Average  metrics: " + " | ".join([f"({k})={v:.4}" for k, v in cv_out.mean().items()])
         )
@@ -245,7 +245,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
 
         return vals[0]
 
-    def build_model_params_for_tuning(self, params):
+    def build_estimator_params_for_tuning(self, params):
         return params
 
     def predict_public_test(self) -> np.array:

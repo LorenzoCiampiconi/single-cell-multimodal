@@ -12,7 +12,7 @@ model_class = LGBMwMultilevelEmbedderCite
 seed = 0
 original_dim = None
 
-model_params = standard_lgbm_cite_conf
+estimator_params = standard_lgbm_cite_conf
 
 logger_kwargs = {
     "name": "basic_autoencoder",
@@ -54,7 +54,7 @@ check_nn_embedder_params(embedder_params)
 
 configuration = {
     "cv_params": cv_params,
-    "model_params": model_params,
+    "estimator_params": estimator_params,
     "embedder_params": embedder_params,
     "seed": seed,
 }

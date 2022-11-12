@@ -1,5 +1,6 @@
 from scmm.models.multioutput import MultiOutputRegressorMixin
-from scmm.problems.cite.base import CiteModelABC, CiteModelEnsembleTargetSubsetABC
+from scmm.models.target_split_ensemble import EnsembleTargetSubsetWSCMMModelEstimatorMixin
+from scmm.problems.cite.base import CiteModelABC
 from scmm.models.lgbm import LGBMMixin
 from scmm.models.embedding.concrete import MultiLevelEmbedderInputMixin, TruncateSVDEmbedderInputMixin
 
@@ -12,5 +13,5 @@ class LGBMwMultilevelEmbedderCite(MultiOutputRegressorMixin, LGBMMixin, MultiLev
     ...
 
 
-class EnsembleSplitTargetSVDCite(TruncateSVDEmbedderInputMixin, CiteModelEnsembleTargetSubsetABC):
+class EnsembleSplitTargetSVDCite(EnsembleTargetSubsetWSCMMModelEstimatorMixin, TruncateSVDEmbedderInputMixin, CiteModelABC):
     ...
