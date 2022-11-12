@@ -1,8 +1,12 @@
 from scmm.models.embedding.autoencoder import BasicAutoEncoderEmbedder
 from scmm.models.embedding.svd import TruncatedSVDEmbedder
 from scmm.problems.cite.concrete import LGBMwMultilevelEmbedderCite
-from scmm.problems.cite.configurations.common_conf import standard_lgbm_cite_conf, dataloader_kwargs, trainer_kwargs, \
-    cv_params
+from scmm.problems.cite.configurations.common_conf import (
+    standard_lgbm_cite_conf,
+    dataloader_kwargs,
+    trainer_kwargs,
+    cv_params,
+)
 from scmm.problems.cite.configurations.utils import check_nn_embedder_params
 from scmm.problems.metrics import common_metrics
 from torch import nn

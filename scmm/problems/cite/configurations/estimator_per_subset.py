@@ -26,25 +26,23 @@ group_1 = df_split[df_split.group == 0]["target_id"].values
 group_2 = df_split[df_split.group == 1]["target_id"].values
 
 subsets_mapping = {
-    tuple(group_1): {
-        "configuration": deepcopy(configuration),
-        "model_class": sub_model_class
-    },
+    tuple(group_1): {"configuration": deepcopy(configuration), "model_class": sub_model_class},
     tuple(group_2): {
         "configuration": deepcopy(configuration),
         "model_class": sub_model_class,
-    }
+    },
 }
 
 for subset in subsets_mapping:
     subsets_mapping[subset]["configuration"]["embedder_params"]["input_dim"] = common_level_svd_output_dim
-    subsets_mapping[subset]["configuration"]["embedder_params"]["embedders_config"][0][1]["input_dim"] = common_level_svd_output_dim
-    subsets_mapping[subset]["configuration"]["embedder_params"]["embedders_config"][0][1]["model_params"]["features_dim"] = len(subset)
+    subsets_mapping[subset]["configuration"]["embedder_params"]["embedders_config"][0][1][
+        "input_dim"
+    ] = common_level_svd_output_dim
+    subsets_mapping[subset]["configuration"]["embedder_params"]["embedders_config"][0][1]["model_params"][
+        "features_dim"
+    ] = len(subset)
 
-estimator_params = {
-    "subset_mapping": subsets_mapping,
-    "output_dim": 140
-}
+estimator_params = {"subset_mapping": subsets_mapping, "output_dim": 140}
 
 configuration = {
     "estimator_params": estimator_params,

@@ -73,7 +73,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
 
     @property
     def estimator_params(self):
-        return self.configuration["estimator_params"] # todo refactor in "estimator params"
+        return self.configuration["estimator_params"]  # todo refactor in "estimator params"
 
     @property
     @abc.abstractmethod

@@ -1,8 +1,13 @@
 from torch import nn
 
 from scmm.models.embedding.autoencoder.full.concrete.multitask import MultiTaskEncoderEmbedder
-from scmm.problems.cite.configurations.common_conf import cv_params, standard_lgbm_cite_conf, original_dim, \
-    dataloader_kwargs, trainer_kwargs
+from scmm.problems.cite.configurations.common_conf import (
+    cv_params,
+    standard_lgbm_cite_conf,
+    original_dim,
+    dataloader_kwargs,
+    trainer_kwargs,
+)
 from scmm.problems.cite.concrete import LGBMwMultilevelEmbedderCite
 from scmm.problems.cite.configurations.lgbm_w_autoencoder import logger_kwargs
 

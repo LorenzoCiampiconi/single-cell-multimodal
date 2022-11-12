@@ -7,7 +7,6 @@ model_class = LGBMwSVDCite
 seed = 0
 
 
-
 embedder_params = {
     "seed": seed,
     "input_dim": original_dim,

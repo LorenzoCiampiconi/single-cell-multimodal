@@ -22,7 +22,7 @@ class SCMModelTargetSubsetMixin:
 
 
 class EnsembleTargetSubsetWSCMMModelEstimator(metaclass=abc.ABCMeta):
-    def __init__(self, *, subset_mapping:dict, output_dim):
+    def __init__(self, *, subset_mapping: dict, output_dim):
         self._subsets_mapping = subset_mapping
         self._output_dim = output_dim
 
@@ -52,7 +52,9 @@ class EnsembleTargetSubsetWSCMMModelEstimator(metaclass=abc.ABCMeta):
         for subset in self._subsets_mapping:
             model_definition = self._subsets_mapping[subset]
             subset_model_class = self._extend_model_w_target_subset_mixin(model_definition["model_class"])
-            subset_model = subset_model_class(configuration=model_definition["configuration"], target_column_subset=subset)
+            subset_model = subset_model_class(
+                configuration=model_definition["configuration"], target_column_subset=subset
+            )
             # subset_model
             subset_models[subset] = subset_model
 

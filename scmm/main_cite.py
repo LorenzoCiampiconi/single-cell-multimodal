@@ -44,4 +44,4 @@ if __name__ == "__main__":
     model_wrapper = model_class(configuration=configuration, label=config_module.model_label)
     model_wrapper.fit(model_wrapper.train_input, model_wrapper.train_target)
     Y_hat = model_wrapper.predict(model_wrapper.train_input)
-    1==1
+    1 == 1

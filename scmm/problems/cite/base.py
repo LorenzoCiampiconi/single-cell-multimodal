@@ -75,6 +75,5 @@ class CiteModelMixin:
         return out
 
 
-class CiteModelABC(CiteModelMixin,SCMModelABC, metaclass=abc.ABCMeta):
+class CiteModelABC(CiteModelMixin, SCMModelABC, metaclass=abc.ABCMeta):
     pass
-

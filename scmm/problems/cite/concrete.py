@@ -13,5 +13,7 @@ class LGBMwMultilevelEmbedderCite(MultiOutputRegressorMixin, LGBMMixin, MultiLev
     ...
 
 
-class EnsembleSplitTargetSVDCite(EnsembleTargetSubsetWSCMMModelEstimatorMixin, TruncateSVDEmbedderInputMixin, CiteModelABC):
+class EnsembleSplitTargetSVDCite(
+    EnsembleTargetSubsetWSCMMModelEstimatorMixin, TruncateSVDEmbedderInputMixin, CiteModelABC
+):
     ...
