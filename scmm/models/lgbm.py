@@ -4,7 +4,7 @@ import lightgbm as lgb
 
 class LGBMMixin:
     @property
-    def model_class(self):
+    def estimator_class(self):
         return lgb.LGBMRegressor
 
     def tune_model(self):

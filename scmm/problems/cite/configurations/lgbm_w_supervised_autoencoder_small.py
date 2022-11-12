@@ -2,8 +2,9 @@ from scmm.models.embedding.autoencoder import BasicAutoEncoderEmbedder
 from scmm.models.embedding.autoencoder.full.concrete.multitask import MultiTaskEncoderEmbedder
 from scmm.models.embedding.svd import TruncatedSVDEmbedder
 from scmm.problems.cite.concrete import LGBMwMultilevelEmbedderCite
-from scmm.problems.cite.configurations.common_conf import standard_lgbm_cite_conf, standard_autoencoder_net_params, \
+from scmm.problems.cite.configurations.common_conf import standard_lgbm_cite_conf, \
     dataloader_kwargs, trainer_kwargs, cv_params
+from scmm.problems.cite.configurations.lgbm_w_supervised_autoencoder_deep import net_params
 from scmm.problems.cite.configurations.utils import check_nn_embedder_params
 from scmm.problems.metrics import common_metrics
 from torch import nn
@@ -20,15 +21,6 @@ logger_kwargs = {
     "name": "supervised_autoencoder_small",
 }
 
-standard_autoencoder_net_params = standard_autoencoder_net_params.copy()
-
-standard_autoencoder_net_params.update(
-    {
-        "input_coef": 0.5,
-        "features_dim": 140,
-        # "extra_head"
-    }
-)
 
 latent_dim = 4
 
@@ -42,16 +34,16 @@ embedder_params = {
             {
                 "seed": seed,
                 "input_dim": original_dim,
-                "output_dim": 32,
+                "output_dim": 64,
             },
         ),
         (
             MultiTaskEncoderEmbedder,
             {
                 "seed": seed,
-                "input_dim": 32,
+                "input_dim": 64,
                 "output_dim": latent_dim,
-                "model_params": standard_autoencoder_net_params,
+                "model_params": net_params,
                 "train_params": {
                     "logger_kwargs": logger_kwargs,
                     "dataloader_kwargs": dataloader_kwargs,

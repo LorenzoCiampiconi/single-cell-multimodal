@@ -31,21 +31,21 @@ class MultiomeModelABC(SCMModelABC, metaclass=abc.ABCMeta):
         if self._train_input is None:
             logger.info(f"{self.model_label} is loading training input from MULTIOME dataset")
             self._train_input = load_sparse(split="train", problem="multi", type="inputs")
-        return self._train_input
+        return super().train_input
 
     @property
     def train_target(self) -> np.array:
         if self._train_target is None:
             logger.info(f"{self.model_label} is loading training target from MULTIOME dataset")
             self._train_target = load_sparse(split="train", problem="multi", type="targets")
-        return self._train_target.toarray()
+        return super().train_target
 
     @property
     def test_input(self) -> sparse.csr_array:
         if self._test_input is None:
             logger.info(f"{self.model_label} is loading test input from MULTIOME dataset")
             self._test_input = load_sparse(split="test", problem="multi", type="inputs")
-        return self._test_input
+        return super().test_input
 
     @property
     def test_input_idx(self):

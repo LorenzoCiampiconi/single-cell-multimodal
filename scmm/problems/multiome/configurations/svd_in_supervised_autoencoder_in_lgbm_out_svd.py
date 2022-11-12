@@ -2,7 +2,7 @@ from torch import nn
 
 from scmm.models.embedding.autoencoder.full.concrete.multitask import MultiTaskEncoderEmbedder
 from scmm.models.embedding.svd import TruncatedSVDEmbedder
-from scmm.problems.cite.configurations.utils import check_embedder_params
+from scmm.problems.cite.configurations.utils import check_nn_embedder_params
 from scmm.problems.metrics import common_metrics
 from scmm.problems.multiome.concrete import SVDwAutoencoderInLGBMOutSVDMultiome
 
@@ -94,7 +94,7 @@ embedder_params = {
     ],
 }
 
-check_embedder_params(embedder_params)
+check_nn_embedder_params(embedder_params)
 
 configuration = {
     "cv_params": cv_params,

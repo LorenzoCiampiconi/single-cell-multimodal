@@ -77,9 +77,9 @@ class ODRModelWrappedMixin(metaclass=abc.ABCMeta):
     @property
     def perform_odr_also_on_target_for_input_dim_reduction(self):
         return (
-                "odr_params" in self.configuration
-                and "odr_also_on_target_for_input_dim_reduction" in self.configuration["odr_params"]
-                and self.configuration["odr_params"]["odr_also_on_target_for_input_dim_reduction"]
+            "odr_params" in self.configuration
+            and "odr_also_on_target_for_input_dim_reduction" in self.configuration["odr_params"]
+            and self.configuration["odr_params"]["odr_also_on_target_for_input_dim_reduction"]
         )
 
     def pre_process_target_for_dim_reduction(self, Y, model_kwargs=None):

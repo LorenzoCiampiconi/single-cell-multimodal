@@ -2,6 +2,8 @@ from torch import nn
 
 from scmm.problems.metrics import common_metrics
 
+original_dim = None
+
 standard_lgbm_cite_conf = {
     "learning_rate": 0.1,
     "objective": "regression",

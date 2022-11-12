@@ -23,6 +23,10 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         self._estimator = None
         self._cv_mod = cv_mod
 
+        self._train_input = None
+        self._train_target = None
+        self._test_input = None
+
     @staticmethod
     def now_string() -> str:
         return datetime.now().strftime("%Y%m%d-%H%M")
@@ -36,7 +40,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         return f"{self.problem_label}_{self._model_label}"
 
     @property
-    def is_trained(self):
+    def is_instantiated(self):
         return self._estimator is not None
 
     @property
@@ -51,41 +55,34 @@ class SCMModelABC(metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
     def train_input(self) -> sparse.csr_array:
-        pass
+        return self._train_input
 
     @property
     @abc.abstractmethod
     def train_target(self) -> sparse.csr_array:
-        pass
+        return self._train_target.toarray()
 
     @property
     @abc.abstractmethod
     def test_input(self) -> sparse.csr_array:
-        pass
+        return self._train_target
 
     @property
     def test_input_idx(self):
         pass
 
-    def instantiate_estimator(self, **model_instantiation_kwargs):
-        return self.model_class(**model_instantiation_kwargs)
+    @property
+    def model_params(self):
+        return self.configuration["model_params"] # todo refactor in "estimator params"
 
     @property
     @abc.abstractmethod
-    def model_class(self):
+    def estimator_class(self):
         pass
-
-    @property
-    def model_instantiation_kwargs(self):
-        return self.model_params
 
     @property
     def cv_params(self):
         return self.configuration["cv_params"]
-
-    @property
-    def model_params(self):
-        return self.configuration["model_params"]
 
     @property
     def seed(self):
@@ -96,8 +93,15 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         return self.configuration["embedder_params"]
 
     @property
+    def model_instantiation_kwargs(self):
+        return self.model_params
+
+    def instantiate_estimator(self, **model_instantiation_kwargs):
+        return self.estimator_class(**model_instantiation_kwargs)
+
+    @property
     def is_fit(self):
-        return self._estimator is not None and self._is_estimator_fit(self._estimator)
+        return self.is_instantiated and self._estimator is not None and self._is_estimator_fit(self._estimator)
 
     @abc.abstractmethod
     def _is_estimator_fit(self, estimator):
@@ -119,11 +123,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         cv_out = self.process_cv_out(cv_raw)
         return cv_out
 
-    def set_params(self):
-        pass  # todo
-
     def cross_validation_of_estimator(self, X, Y, custom_params=None, **kwargs):
-        # TODO with strategy: {self.cv_params['strategy']}")
         model_params = custom_params if custom_params is not None else self.model_instantiation_kwargs
         instantiate_model = lambda: self.instantiate_estimator(**model_params)
         cv_raw = cross_validate(instantiate_model, X, Y, **self.cv_params)
@@ -249,10 +249,7 @@ class SCMModelABC(metaclass=abc.ABCMeta):
         return params
 
     def predict_public_test(self) -> np.array:
-        X_test_reduced = self.apply_dimensionality_reduction(
-            input=self.test_input, runtime_labelling=f"{self.problem_label}_public_test", read_cache=True
-        )
-        return self._trained_model.predict(X_test_reduced)
+        return self.predict(self.test_input, runtime_labelling=f"public_test", read_cache=True)
 
     @abc.abstractmethod
     def generate_submission_output(self, test_output: np.array):

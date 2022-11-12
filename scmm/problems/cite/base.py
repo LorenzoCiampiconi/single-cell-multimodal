@@ -4,6 +4,8 @@ import logging
 import pandas as pd
 import numpy as np
 from scipy import sparse
+
+from scmm.models.target_split_ensemble import SCMModelEnsembleTargetSubset
 from scmm.utils.appdirs import app_static_dir
 
 from scmm.utils.data_handling import load_sparse
@@ -12,15 +14,11 @@ from scmm.models.base_model import SCMModelABC
 logger = logging.getLogger(__name__)
 
 
-class CiteModelABC(SCMModelABC, metaclass=abc.ABCMeta):
+class CiteModelMixin:
     public_test_index: int = 0
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-        self._train_input = None
-        self._train_target = None
-        self._test_input = None
 
     @property
     def problem_label(self) -> str:
@@ -31,21 +29,21 @@ class CiteModelABC(SCMModelABC, metaclass=abc.ABCMeta):
         if self._train_input is None:
             logger.info(f"{self.model_label} is loading training input from CITE dataset")
             self._train_input = load_sparse(split="train", problem="cite", type="inputs")
-        return self._train_input
+        return super().train_input
 
     @property
     def train_target(self) -> np.array:
         if self._train_target is None:
             logger.info(f"{self.model_label} is loading training target from CITE dataset")
             self._train_target = load_sparse(split="train", problem="cite", type="targets")
-        return self._train_target.toarray()
+        return super().train_target
 
     @property
     def test_input(self) -> sparse.csr_array:
         if self._test_input is None:
             logger.info(f"{self.model_label} is loading test input from CITE dataset")
             self._test_input = load_sparse(split="test", problem="cite", type="inputs")
-        return self._test_input
+        return super().test_input
 
     @property
     def test_input_idx(self):
@@ -76,3 +74,11 @@ class CiteModelABC(SCMModelABC, metaclass=abc.ABCMeta):
         out = out.squeeze()
 
         return out
+
+
+class CiteModelABC(CiteModelMixin,SCMModelABC, metaclass=abc.ABCMeta):
+    pass
+
+
+class CiteModelEnsembleTargetSubsetABC(CiteModelMixin, SCMModelEnsembleTargetSubset, metaclass=abc.ABCMeta):
+    pass

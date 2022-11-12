@@ -10,23 +10,23 @@ class MultiOutputEstimatorWrapperMixin(metaclass=abc.ABCMeta):
 
     @property
     @abc.abstractmethod
-    def model_wrapper_class(self):
+    def estimator_wrapper_class(self):
         pass
 
     def instantiate_estimator(self, **model_instantiation_kwargs):
-        return self.model_wrapper_class(**model_instantiation_kwargs)
+        return self.estimator_wrapper_class(**model_instantiation_kwargs)
 
     @property
     def model_instantiation_kwargs(self):
-        return {"estimator": self.model_class(**self.model_params)}
+        return {"estimator": self.estimator_class(**self.model_params)}
 
     def build_model_params_for_tuning(self, params):
-        return {"estimator": self.model_class(**params)}
+        return {"estimator": self.estimator_class(**params)}
 
 
 class MultiOutputRegressorMixin(MultiOutputEstimatorWrapperMixin):
     @property
-    def model_wrapper_class(self):
+    def estimator_wrapper_class(self):
         return MultiOutputRegressor
 
     def _is_estimator_fit(self, estimator):
