@@ -26,8 +26,8 @@ group_1 = df_split[df_split.group == 0]["target_id"].values
 group_2 = df_split[df_split.group == 1]["target_id"].values
 
 subsets_mapping = {
-    tuple(range(0,70)): {"configuration": deepcopy(configuration), "model_class": sub_model_class},
-    tuple(range(70,140)): {
+    tuple(range(0, 70)): {"configuration": deepcopy(configuration), "model_class": sub_model_class},
+    tuple(range(70, 140)): {
         "configuration": deepcopy(configuration),
         "model_class": sub_model_class,
     },

@@ -15,5 +15,5 @@ def correlation_score(y_true, y_pred):
 
     corrsum = 0
     for i in range(len(y_true)):
-        corrsum += np.corrcoef(y_true[i], y_pred[i])[1, 0] # rowvar = False?
+        corrsum += np.corrcoef(y_true[i], y_pred[i])[1, 0]  # rowvar = False?
     return corrsum / len(y_true)

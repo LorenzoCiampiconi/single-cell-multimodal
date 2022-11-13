@@ -19,7 +19,8 @@ class MultiTaskEncoder(BasicAutoEncoder):
         super().__init__(lr=lr, encoder=encoder, decoder=decoder, loss=loss)
         self.input_coef = input_coef
 
-        self.recon_feat_loss = feat_loss  #  nn.HuberLoss()
+        self.recon_feat_loss = feat_loss
+        self.regr_loss = nn.HuberLoss()
         self.recon_feat_metrics = torchmetrics.MetricCollection(
             [
                 torchmetrics.MeanSquaredError(),
@@ -46,14 +47,15 @@ class MultiTaskEncoder(BasicAutoEncoder):
 
         input_loss = self.recon_loss(y_hat, y)
         feat_loss = self.recon_feat_loss(feat_hat, feat).mean()
+        regr_loss = self.regr_loss(feat_hat, feat)
 
         self.recon_metrics(y_hat, y)
         self.recon_feat_metrics(feat_hat, feat)
 
-        return (z, y_hat, feat_hat), (input_loss, feat_loss)
+        return (z, y_hat, feat_hat), (input_loss, feat_loss, regr_loss)
 
     def training_step(self, batch, batch_idx):
-        _, (input_loss, feat_loss) = self.main_training(batch)
+        _, (input_loss, feat_loss, regr_loss) = self.main_training(batch)
 
         self.log("recon_loss/input", input_loss, on_step=True, on_epoch=True)
         self.log("recon_loss/feat", feat_loss, on_step=True, on_epoch=True)
@@ -61,7 +63,7 @@ class MultiTaskEncoder(BasicAutoEncoder):
         self.log_dict(self.recon_metrics, on_step=True, on_epoch=True)
         self.log_dict(self.recon_feat_metrics, on_step=True, on_epoch=True)
 
-        loss = self.input_coef * input_loss + feat_loss
+        loss = self.input_coef * input_loss + feat_loss + regr_loss / 8
         self.log("loss", loss, on_step=True, on_epoch=True)
 
         return loss

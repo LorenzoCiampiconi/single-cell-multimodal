@@ -1,6 +1,9 @@
+import pandas as pd
+from sklearn.model_selection import LeaveOneGroupOut
 from torch import nn
 
 from scmm.problems.metrics import common_metrics
+from scmm.utils.metadata import map_to_dataset
 
 original_dim = None
 
@@ -38,4 +41,13 @@ standard_autoencoder_net_params = {
     "loss": nn.SmoothL1Loss(),
 }
 
-cv_params = {"cv": 3, "scoring": common_metrics, "verbose": 10}
+metadata = pd.read_csv("data/metadata.csv")
+metadata["dataset"] = metadata.apply(map_to_dataset, axis=1)
+train_metadata = metadata[(metadata["technology"] == "citeseq") & (metadata["dataset"] == "train")]
+
+cv_params = {
+    "cv": LeaveOneGroupOut(),
+    "groups": train_metadata["donor"].to_numpy(),
+    "scoring": common_metrics,
+    "verbose": 10,
+}

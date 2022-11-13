@@ -17,7 +17,7 @@ class BasicAutoEncoder(pl.LightningModule):
         self.decoder = decoder if decoder is not None else encoder.mirror_sequential_for_decoding()
         self.lr = lr
 
-        self.recon_loss = loss # nn.SmoothL1Loss(beta=2e-1)
+        self.recon_loss = loss  # nn.SmoothL1Loss(beta=2e-1)
         self.recon_metrics = torchmetrics.MetricCollection(
             [
                 torchmetrics.MeanSquaredError(),

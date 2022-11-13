@@ -6,7 +6,6 @@ from scmm.problems.cite.configurations.common_conf import (
     standard_lgbm_cite_conf,
     original_dim,
     dataloader_kwargs,
-
 )
 from scmm.problems.cite.concrete import LGBMwMultilevelEmbedderCite
 from scmm.problems.cite.configurations.lgbm_w_autoencoder import logger_kwargs

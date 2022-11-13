@@ -42,6 +42,6 @@ if __name__ == "__main__":
     configuration = config_module.configuration
     model_class = config_module.model_class
 
-    model_wrapper:SCMModelABC = model_class(configuration=configuration, label=config_module.model_label)
+    model_wrapper: SCMModelABC = model_class(configuration=configuration, label=config_module.model_label)
 
     model_wrapper.full_cross_validation()

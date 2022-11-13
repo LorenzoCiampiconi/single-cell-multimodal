@@ -1,12 +1,10 @@
 import torchmetrics
 from torch import nn
 
-from scmm.models.embedding.autoencoder.full.concrete.multitask import \
-    MultiTaskEncoderEmbedder
+from scmm.models.embedding.autoencoder.full.concrete.multitask import MultiTaskEncoderEmbedder
 from scmm.models.embedding.svd import TruncatedSVDEmbedder
 from scmm.problems.cite.concrete import LGBMwMultilevelEmbedderCite
-from scmm.problems.cite.configurations.common_conf import (
-    cv_params, standard_lgbm_cite_conf)
+from scmm.problems.cite.configurations.common_conf import cv_params, standard_lgbm_cite_conf
 from scmm.problems.cite.configurations.utils import check_nn_embedder_params
 from scmm.problems.metrics import common_metrics
 
@@ -26,7 +24,7 @@ dataloader_kwargs = {
 }
 trainer_kwargs = {
     # "accelerator": "gpu",
-    "max_epochs": 30,
+    "max_epochs": 20,
     "check_val_every_n_epoch": 1,
     # "val_check_interval": 1,
     "log_every_n_steps": 50,
@@ -36,7 +34,7 @@ net_params = {
     "lr": 5e-4,
     "shrinking_factors": (2, 2, 2, 2),
     "activation_function": nn.SELU,
-    "input_coef": 1 / 10,
+    "input_coef": 1 / 3,
     "features_dim": 140,
     "loss": nn.SmoothL1Loss(),
     "feat_loss": torchmetrics.PearsonCorrCoef(num_outputs=140),

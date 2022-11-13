@@ -44,7 +44,7 @@ def cross_validate(
     # We clone the estimator to make sure that all the folds are
     # independent, and that it is pickle-able.
     results = []
-    for train, test in tqdm(cv.split(X, y, groups), total=cv.get_n_splits(), desc="k-fold", disable=not progress_bar):
+    for train, test in tqdm(cv.split(X, y, groups), total=cv.get_n_splits(X, y, groups), desc="crossval", disable=not progress_bar):
         res = _fit_and_score(
             instantiate_model(),
             X,
