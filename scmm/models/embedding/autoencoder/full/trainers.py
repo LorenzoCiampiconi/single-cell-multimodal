@@ -46,6 +46,10 @@ class AutoEncoderTrainer(Embedder, metaclass=abc.ABCMeta):
     def build_model(self):
         ...
 
+    @abc.abstractmethod
+    def build_params(self):
+        ...
+
     @property
     @abc.abstractmethod
     def autoencoder_class(self) -> Type[pl.LightningModule]:
@@ -133,11 +137,12 @@ class AutoEncoderTrainer(Embedder, metaclass=abc.ABCMeta):
         self.trainer.save_checkpoint(path, **kwargs)
 
     def load_model(self, path, **kwargs):
-        return self.autoencoder_class.load_from_checkpoint(path, **kwargs)
+        self.init_trainer()
+        self.model = self.model.load_from_checkpoint(path, **kwargs)
 
 
 class MultiTaskAutoEncoderTrainer(AutoEncoderTrainer, metaclass=abc.ABCMeta):
-    def build_data_loader(self, input, *, Y=None, shuffle=False, **kwargs):
+    def build_data_loader_supervised(self, input, *, Y=None, shuffle=False, **kwargs):
         assert Y is not None
         ds = IODataset(input, Y)
         dsl = DataLoader(
@@ -153,13 +158,13 @@ class MultiTaskAutoEncoderTrainer(AutoEncoderTrainer, metaclass=abc.ABCMeta):
     def fit(self, *, input: ArrayLike, Y=None, **kwargs):
         assert Y is not None
         self.init_trainer(**kwargs)
-        dsl = self.build_data_loader(input, Y=Y, shuffle=True)
+        dsl = self.build_data_loader_supervised(input, Y=Y, shuffle=True)
         self.trainer.fit(self.model, train_dataloaders=dsl)
         self._fitted = True
         return self
 
     def transform(self, *, input: ArrayLike, **kwargs) -> np.array:
-        dsl = super().build_data_loader(input)
+        dsl = self.build_data_loader(input)
         encoder = self.model.encoder.eval()
 
         with torch.no_grad():
@@ -168,7 +173,7 @@ class MultiTaskAutoEncoderTrainer(AutoEncoderTrainer, metaclass=abc.ABCMeta):
         return out
 
     def inverse_transform(self, *, input: ArrayLike, **kwargs) -> np.array:
-        dsl = super().build_data_loader(input)
+        dsl = self.build_data_loader(input)
         decoder = self.model.decoder.decoder.eval()
 
         with torch.no_grad():

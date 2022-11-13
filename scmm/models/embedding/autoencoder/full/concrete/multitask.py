@@ -22,7 +22,7 @@ class MultiTaskEncoderEmbedder(MultiTaskAutoEncoderTrainer, Embedder):
     def autoencoder_class(self) -> Type[pl.LightningModule]:
         return MultiTaskEncoder
 
-    def build_model(self):
+    def build_params(self):
         lr = self.model_params["lr"]
         input_coef = self.model_params["input_coef"]
 
@@ -73,7 +73,7 @@ class MultiTaskEncoderEmbedder(MultiTaskAutoEncoderTrainer, Embedder):
             head=head,
         )
 
-        return self.autoencoder_class(
+        return dict(
             lr=lr,
             input_coef=input_coef,
             encoder=encoder,
@@ -82,7 +82,13 @@ class MultiTaskEncoderEmbedder(MultiTaskAutoEncoderTrainer, Embedder):
             feat_loss=self.model_params["feat_loss"],
         )
 
-    def _predict(self, ds):
-        out, extra = self.trainer.predict(self.model, ds)  # TODO broken? use extra
+    def build_model(self):
+        params = self.build_params()
+        return self.autoencoder_class(**params)
+
+    def predict(self, ds):
+        dsl = self.build_data_loader(ds)
+        out, extra = self.trainer.predict(self.model, dsl)  # TODO broken? use extra
         out = as_numpy(torch.cat(out)).reshape(-1, self.input_dim)
-        return out
+        extra = as_numpy(torch.cat(out)).reshape(-1,  self.model_params["features_dim"])
+        return out, extra
