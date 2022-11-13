@@ -88,7 +88,7 @@ class MultiTaskEncoderEmbedder(MultiTaskAutoEncoderTrainer, Embedder):
 
     def predict(self, ds):
         dsl = self.build_data_loader(ds)
-        out, extra = self.trainer.predict(self.model, dsl)  # TODO broken? use extra
+        out, extra = zip(*self.trainer.predict(self.model, dsl))
         out = as_numpy(torch.cat(out)).reshape(-1, self.input_dim)
-        extra = as_numpy(torch.cat(out)).reshape(-1,  self.model_params["features_dim"])
+        extra = as_numpy(torch.cat(extra)).reshape(-1, self.model_params["features_dim"])
         return out, extra
