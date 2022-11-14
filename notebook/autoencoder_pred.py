@@ -13,7 +13,7 @@ from scmm.utils.data_handling import load_sparse
 
 # %% setup
 
-cite_exp = "pearson_mse"
+cite_exp = "pearson_2_only"
 # multiome_exp = "baseline"
 multiome_exp = "cite_lgbm_w_4lrs-deep_supervised_autoencoder_dim-2048-128_20221107-0043_submission"
 
@@ -21,7 +21,7 @@ multiome_exp = "cite_lgbm_w_4lrs-deep_supervised_autoencoder_dim-2048-128_202211
 
 model = MultiTaskEncoderEmbedder(**embedder_params["embedders_config"][1][1])
 model.load_model(
-    "log/tensorboard/supervised_autoencoder_cite/version_0/checkpoints/epoch=19-step=11100.ckpt", **model.build_params()
+    "log/tensorboard/supervised_autoencoder_cite/version_4/checkpoints/epoch=19-step=11100.ckpt", **model.build_params()
 )
 
 # %% data
@@ -40,7 +40,7 @@ _, test_output = model.predict(red_input)
 df = pd.Series(test_output.ravel(), name="target").to_frame()
 df["target"].iloc[0:7476] = 0
 df.index.name = "row_id"
-# df.to_csv(app_static_dir("out") / f"{cite_exp}.csv")
+df.to_csv(app_static_dir("out") / f"{cite_exp}.csv")
 
 # %% combine multiome
 
@@ -48,4 +48,4 @@ out = pd.read_csv(f"out/{multiome_exp}.csv", index_col=0)
 # df = pd.read_csv(f"out/{cite_exp}.csv", index_col=0)
 
 out.loc[df.index, "target"] = df["target"]
-out.to_csv(app_static_dir("out") / "huber_mse.csv")
+out.to_csv(app_static_dir("out") / f"{cite_exp}_{multiome_exp}.csv")

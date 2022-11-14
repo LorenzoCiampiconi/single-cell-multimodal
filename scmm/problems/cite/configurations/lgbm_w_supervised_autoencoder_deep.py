@@ -2,6 +2,7 @@ import torchmetrics
 from torch import nn
 
 from scmm.models.embedding.autoencoder.full.concrete.multitask import MultiTaskEncoderEmbedder
+from scmm.models.embedding.autoencoder.utils import WeightedLosses
 from scmm.models.embedding.svd import TruncatedSVDEmbedder
 from scmm.problems.cite.concrete import LGBMwMultilevelEmbedderCite
 from scmm.problems.cite.configurations.common_conf import cv_params, standard_lgbm_cite_conf
@@ -37,7 +38,12 @@ net_params = {
     "input_coef": 1 / 3,
     "features_dim": 140,
     "loss": nn.SmoothL1Loss(),
-    "feat_loss": torchmetrics.PearsonCorrCoef(num_outputs=140),
+    "feat_loss": WeightedLosses(
+        {
+            # "HuberLoss": (nn.HuberLoss(), 1 / 4),
+            "PearsonCoeff": (torchmetrics.PearsonCorrCoef(num_outputs=140), -2),
+        }
+    ),
     # "extra_head"
 }
 

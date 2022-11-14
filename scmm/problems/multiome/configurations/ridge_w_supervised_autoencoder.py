@@ -33,7 +33,7 @@ net_params = {
     "shrinking_factors": (2, 2, 2, 2),
     "activation_function": nn.SELU,
     "loss": nn.SmoothL1Loss(),
-    "feat_loss": torchmetrics.PearsonCorrCoef(num_outputs=#TODO),
+    "feat_loss": nn.HuberLoss(),
 }
 
 svd_out_dim = 2048
