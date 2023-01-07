@@ -20,3 +20,33 @@ Multiome:
  - on the output one can apply
    - a ridge multioutput regression
    - a lgbm that make prediction on a shrinked subspaced by mean of truncated-svd. The prediction is then projected on the full space by the inverse SVD.
+
+
+## Setup
+`pip install -r requirements.txt`
+
+`chmod +x data_setup.sh`
+
+`./data_setup.sh`
+
+## Full Pipeline
+The python entry point for the two problems are:
+
+ - `main_cite.py`
+
+ - `main_multiome.py`
+
+
+They should be provided with a configuration for the model and the eventual network paramters, configurations key can be find in:
+
+ - `scmm.problems.cite.configurations.__init__.py`
+ 
+ - `scmm.problems.multiome.configurations.__init__.py`
+
+an example run can be:
+
+`python3 scmm/main_cite.py baseline`
+
+`python3 scmm/main_multiome.py svd_in_autsupervised_lgbm_out_svd`
+
+under each `configurations` module you can find the defined configurations in specific python files
