@@ -1,6 +1,8 @@
 # single-cell-multimodal
 
-This is a repository of model experiments for the Multimodal Single-Cell Integration kaggle competition.
+This is a repository of model experiments for the Multimodal Single-Cell Integration Open Problem.
+
+For and overview of the problem this model is solving please refer to https://openproblems.bio/neurips_docs/data/about_multimodal/
 
 The current developed pipeline is made of two abstract flexible models, 
 one for each of the two problems, Multiome and Citeseq, that can be built up, trained and tuned with different options.
