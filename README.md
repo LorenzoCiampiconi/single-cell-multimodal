@@ -8,9 +8,9 @@ one for each of the two problems, Multiome and Citeseq, that can be built up, tr
 CiteSeq:
  - A Truncated SVD layer. This layer is mandatory to make the problem feasible (original input space is ...)
  - An optional multitask supervised embedding layer. The task employable are
-  - autoenconding of the reduced input space
-  - original regression problem
-  - prediction of cell labelling available in the metadata (not yet developed)
+   - autoenconding of the reduced input space
+   - original regression problem
+   - prediction of cell labelling available in the metadata (not yet developed)
  - A multioutput sklearn wrapper that can be filled individual regressor:
   - currently the model employ y lgbm regressor
  - Instead of the multioutput a linear multiregression layer can be employed, this is not effective in case there's no supervision in the extraction of the embedding
