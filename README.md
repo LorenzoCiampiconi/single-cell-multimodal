@@ -50,3 +50,5 @@ an example run can be:
 `python3 scmm/main_multiome.py svd_in_autsupervised_lgbm_out_svd`
 
 under each `configurations` module you can find the defined configurations in specific python files
+
+The output predictions will be written under `/out` directory
