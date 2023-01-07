@@ -1,4 +1,3 @@
-focus on CITEseq, fix of lgbm with sparse data, deeper read of cite seq data docs
 ## Understanding
 
 - input of cite is made of counts log1p-normalised (RNA levels), it is really sparse
