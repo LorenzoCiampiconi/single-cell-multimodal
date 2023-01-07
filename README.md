@@ -18,5 +18,5 @@ CiteSeq:
 Multiome:
  - Multiome model share the same input encoding possibilites of the Citeseq one
  - on the output one can apply
-  - a ridge multioutput regression
-  - a lgbm that make prediction on a shrinked subspaced by mean of truncated-svd. The prediction is then projected on the full space by the inverse SVD.
+   - a ridge multioutput regression
+   - a lgbm that make prediction on a shrinked subspaced by mean of truncated-svd. The prediction is then projected on the full space by the inverse SVD.
