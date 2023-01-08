@@ -2,10 +2,10 @@
 
 This is a repository of model experiments for the Multimodal Single-Cell Integration Open Problem.
 
-For and overview of the problem this model is solving please refer to https://openproblems.bio/neurips_docs/data/about_multimodal/
+For an overview of the problem this model is solving please refer to: https://openproblems.bio/neurips_docs/data/about_multimodal/
 
 The current developed pipeline is made of two abstract flexible models, 
-one for each of the two problems, Multiome and Citeseq, that can be built up, trained and tuned with different options.
+one for each of the two problems, Multiome and Citeseq, that can be built up, trained and tuned with different configurations and network topologies.
 
 CiteSeq:
  - A Truncated SVD layer. This layer is mandatory to make the problem feasible (original input space is ...)
