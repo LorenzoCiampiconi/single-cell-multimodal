@@ -13,9 +13,9 @@ CiteSeq:
    - autoenconding of the reduced input space
    - original regression problem
    - prediction of cell labelling available in the metadata (not yet developed)
- - A multioutput sklearn wrapper that can be filled individual regressor:
-  - currently the model employ y lgbm regressor
- - Instead of the multioutput a linear multiregression layer can be employed, this is not effective in case there's no supervision in the extraction of the embedding
+ - A multioutput sklearn wrapper that can be filled with a regressor for each dimension of the output:
+   - currently the model employs lgbm regressors
+ - Instead of the multioutput a linear multiregression layer can be employed, this is not effective in case there's no supervision in the extraction of the embeddings
 
 Multiome:
  - Multiome model share the same input encoding possibilites of the Citeseq one
